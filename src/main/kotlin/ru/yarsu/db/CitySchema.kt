@@ -1,4 +1,4 @@
-package ru.yarsu
+package ru.yarsu.db
 
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable

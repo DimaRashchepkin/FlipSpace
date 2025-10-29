@@ -1,4 +1,4 @@
-package ru.yarsu
+package ru.yarsu.web
 
 import io.ktor.server.application.*
 import io.ktor.server.pebble.*
@@ -13,7 +13,7 @@ fun Application.configureTemplating() {
         })
     }
     routing {
-        get("/pebble-index") {
+        get("/") {
             val sampleUser = PebbleUser(1, "John")
             call.respond(PebbleContent("pebble-index.html", mapOf("user" to sampleUser)))
         }

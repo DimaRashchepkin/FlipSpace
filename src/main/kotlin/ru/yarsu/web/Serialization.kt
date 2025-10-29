@@ -1,4 +1,4 @@
-package ru.yarsu
+package ru.yarsu.web
 
 import io.ktor.server.application.*
 import io.ktor.server.response.*
