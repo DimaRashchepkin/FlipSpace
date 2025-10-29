@@ -1,4 +1,4 @@
-# ktor-sample
+# flipspace
 
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
@@ -6,15 +6,20 @@ Here are some useful links to get you started:
 
 - [Ktor Documentation](https://ktor.io/docs/home.html)
 - [Ktor GitHub page](https://github.com/ktorio/ktor)
-- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need to [request an invitation](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
+- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
 
 ## Features
 
 Here's a list of features included in this project:
 
-| Name                                               | Description                                                 |
-| ----------------------------------------------------|------------------------------------------------------------- |
-| [Routing](https://start.ktor.io/p/routing-default) | Allows to define structured routes and associated handlers. |
+| Name                                                                   | Description                                                                        |
+| ------------------------------------------------------------------------|------------------------------------------------------------------------------------ |
+| [Routing](https://start.ktor.io/p/routing)                             | Provides a structured routing DSL                                                  |
+| [kotlinx.serialization](https://start.ktor.io/p/kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library                     |
+| [Content Negotiation](https://start.ktor.io/p/content-negotiation)     | Provides automatic content conversion according to Content-Type and Accept headers |
+| [Postgres](https://start.ktor.io/p/postgres)                           | Adds Postgres database to your application                                         |
+| [Pebble](https://start.ktor.io/p/pebble)                               | Allows you to use Pebble templates as views within your application                |
+| [Static Content](https://start.ktor.io/p/static-content)               | Serves static files from defined locations                                         |
 
 ## Building & Running
 
@@ -34,6 +39,6 @@ If the server starts successfully, you'll see the following output:
 
 ```
 2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
-2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8070
+2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
 ```
 
