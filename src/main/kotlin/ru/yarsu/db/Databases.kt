@@ -1,53 +1,83 @@
 package ru.yarsu.db
 
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.log
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.routing
 import java.sql.Connection
 import java.sql.DriverManager
 
 fun Application.configureDatabases() {
     val dbConnection: Connection = connectToPostgres(embedded = true)
     val cityService = CityService(dbConnection)
-    
+
     routing {
-    
-        // Create city
-        post("/cities") {
-            val city = call.receive<City>()
-            val id = cityService.create(city)
-            call.respond(HttpStatusCode.Created, id)
-        }
-    
-        // Read city
-        get("/cities/{id}") {
-            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            try {
-                val city = cityService.read(id)
-                call.respond(HttpStatusCode.OK, city)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-    
-        // Update city
-        put("/cities/{id}") {
-            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            val user = call.receive<City>()
-            cityService.update(id, user)
-            call.respond(HttpStatusCode.OK)
-        }
-    
-        // Delete city
-        delete("/cities/{id}") {
-            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            cityService.delete(id)
-            call.respond(HttpStatusCode.OK)
+        configureCityRoutes(cityService)
+    }
+}
+
+private fun Route.configureCityRoutes(cityService: CityService) {
+    createCityRoute(cityService)
+    readCityRoute(cityService)
+    updateCityRoute(cityService)
+    deleteCityRoute(cityService)
+}
+
+private fun Route.createCityRoute(cityService: CityService) {
+    post("/cities") {
+        val city = call.receive<City>()
+        val id = cityService.create(city)
+        call.respond(HttpStatusCode.Created, id)
+    }
+}
+
+@Suppress("SwallowedException")
+private fun Route.readCityRoute(cityService: CityService) {
+    get("/cities/{id}") {
+        val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+        try {
+            val city = cityService.read(id)
+            call.respond(HttpStatusCode.OK, city)
+        } catch (e: NoSuchElementException) {
+            call.respond(HttpStatusCode.NotFound, "City not found")
         }
     }
 }
+
+@Suppress("SwallowedException")
+private fun Route.updateCityRoute(cityService: CityService) {
+    put("/cities/{id}") {
+        val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+        val user = call.receive<City>()
+        try {
+            cityService.update(id, user)
+            call.respond(HttpStatusCode.OK)
+        } catch (e: NoSuchElementException) {
+            call.respond(HttpStatusCode.NotFound, "City not found")
+        }
+    }
+}
+
+@Suppress("SwallowedException")
+private fun Route.deleteCityRoute(cityService: CityService) {
+    delete("/cities/{id}") {
+        val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+        try {
+            cityService.delete(id)
+            call.respond(HttpStatusCode.OK)
+        } catch (e: NoSuchElementException) {
+            call.respond(HttpStatusCode.NotFound, "City not found")
+        }
+    }
+}
+
 /**
  * Makes a connection to a Postgres database.
  *

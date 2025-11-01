@@ -1,12 +1,15 @@
 package ru.yarsu.db
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import java.sql.Connection
+import java.sql.SQLException
 import java.sql.Statement
 
 @Serializable
 data class City(val name: String, val population: Int)
+
 class CityService(private val connection: Connection) {
     companion object {
         private const val CREATE_TABLE_CITIES =
@@ -15,7 +18,6 @@ class CityService(private val connection: Connection) {
         private const val INSERT_CITY = "INSERT INTO cities (name, population) VALUES (?, ?)"
         private const val UPDATE_CITY = "UPDATE cities SET name = ?, population = ? WHERE id = ?"
         private const val DELETE_CITY = "DELETE FROM cities WHERE id = ?"
-
     }
 
     init {
@@ -23,6 +25,7 @@ class CityService(private val connection: Connection) {
         statement.executeUpdate(CREATE_TABLE_CITIES)
     }
 
+    @Suppress("UnusedPrivateProperty")
     private var newCityId = 0
 
     // Create new city
@@ -36,7 +39,7 @@ class CityService(private val connection: Connection) {
         if (generatedKeys.next()) {
             return@withContext generatedKeys.getInt(1)
         } else {
-            throw Exception("Unable to retrieve the id of the newly inserted city")
+            throw SQLException("Unable to retrieve the id of the newly inserted city")
         }
     }
 
@@ -51,24 +54,32 @@ class CityService(private val connection: Connection) {
             val population = resultSet.getInt("population")
             return@withContext City(name, population)
         } else {
-            throw Exception("Record not found")
+            throw NoSuchElementException("Record not found for id: $id")
         }
     }
 
     // Update a city
+    @Suppress("MagicNumber")
     suspend fun update(id: Int, city: City) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_CITY)
         statement.setString(1, city.name)
         statement.setInt(2, city.population)
         statement.setInt(3, id)
-        statement.executeUpdate()
+        val affectedRows = statement.executeUpdate()
+
+        if (affectedRows == 0) {
+            throw NoSuchElementException("Record not found for update with id: $id")
+        }
     }
 
     // Delete a city
     suspend fun delete(id: Int) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(DELETE_CITY)
         statement.setInt(1, id)
-        statement.executeUpdate()
+        val affectedRows = statement.executeUpdate()
+
+        if (affectedRows == 0) {
+            throw NoSuchElementException("Record not found for deletion with id: $id")
+        }
     }
 }
-

@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 group = "ru.yarsu"
@@ -9,6 +11,10 @@ version = "0.0.1"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
@@ -24,4 +30,46 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+}
+
+ktlint {
+    version.set("0.50.0")
+    android.set(false)
+    ignoreFailures.set(false)
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+
+detekt {
+    toolVersion = "1.23.4"
+    config.setFrom("$projectDir/detekt.yml")
+    buildUponDefaultConfig = true
+    allRules = false
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html {
+            required.set(true)
+            outputLocation.set(file("build/reports/detekt/detekt.html"))
+        }
+        xml.required.set(false)
+        txt.required.set(false)
+    }
+}
+
+tasks.named("check") {
+    dependsOn("ktlintCheck", "detekt")
+}
+
+tasks.register("fixCodeStyle") {
+    group = "verification"
+    description = "Automatically fix code style issues"
+    dependsOn("ktlintFormat", "detekt")
+}
+
+kotlin {
+    jvmToolchain(17)
 }

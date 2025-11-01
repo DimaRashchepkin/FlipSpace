@@ -1,6 +1,6 @@
 package ru.yarsu
 
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 import io.ktor.server.netty.EngineMain
 import ru.yarsu.db.configureDatabases
 import ru.yarsu.web.configureSerialization
