@@ -1,0 +1,60 @@
+{% extends "../meta/base.html" %}
+{% block title %}FlipSpace{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex flex-column" style="overflow-y: auto;">
+    {% include "../meta/header.html" %}
+    <div class="hero-section">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-75">
+                <div class="col-md-8 col-lg-6 text-center">
+                    <h1 class="display-3 fw-bold text-white mb-4 animate-text">
+                        Flip<span class="text-warning">Space</span>
+                    </h1>
+
+                    <p class="lead text-light mb-5 opacity-75">
+                        Изучайте с помощью карточек. Запоминайте эффективнее.
+                    </p>
+
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                        <a href="/login" class="btn btn-primary btn-lg px-4 me-md-2 btn-glow">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Войти
+                        </a>
+                        <a href="/register" class="btn btn-outline-light btn-lg px-4 btn-glow">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Зарегистрироваться
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4 d-flex">
+                <div class="feature-card p-4 rounded-4 w-100">
+                    <i class="bi bi-lightning-charge display-6 text-primary mb-3"></i>
+                    <h4 class="text-white">Быстро</h4>
+                    <p class="text-light opacity-75">Мгновенный доступ к вашим карточкам</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 d-flex">
+                <div class="feature-card p-4 rounded-4 w-100">
+                    <i class="bi bi-bar-chart display-6 text-success mb-3"></i>
+                    <h4 class="text-white">Эффективно</h4>
+                    <p class="text-light opacity-75">Запоминайте на 80% эффективнее</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 d-flex">
+                <div class="feature-card p-4 rounded-4 w-100">
+                    <i class="bi bi-phone display-6 text-info mb-3"></i>
+                    <h4 class="text-white">Универсально</h4>
+                    <p class="text-light opacity-75">Подходит для языков, формул, определений и даже программирования</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "../meta/footer.html" %}
+</div>
+{% endblock %}
