@@ -2,6 +2,7 @@ package ru.yarsu.web
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.pebble.Pebble
 import io.ktor.server.pebble.PebbleContent
 import io.ktor.server.response.respond
@@ -18,10 +19,9 @@ fun Application.configureTemplating() {
         )
     }
     routing {
+        staticResources("/static", "static")
         get("/") {
-            val sampleUser = PebbleUser(1, "John")
-            call.respond(PebbleContent("pebble-index.html", mapOf("user" to sampleUser)))
+            call.respond(PebbleContent("common/front.html", emptyMap()))
         }
     }
 }
-data class PebbleUser(val id: Int, val name: String)
