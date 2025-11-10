@@ -1,7 +1,6 @@
 name: Testing
 on:
-  pull_request:
-    branches: [ master ]
+  [ push ]
 
 jobs:
   Testing:
@@ -15,6 +14,6 @@ jobs:
 
       - name: Testing
         run:
-          ./gradlew test
+          sudo ./gradlew test
 
       - run: echo "Status - ${{ job.status }}."
