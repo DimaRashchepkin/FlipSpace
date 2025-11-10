@@ -12,9 +12,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v5
 
-      - name: Testing
+      - name: Fix permissions
         run:
           chmod +x ./gradlew
+      - name: Testing
+        run:
           ./gradlew test
 
       - run: echo "Status - ${{ job.status }}."
