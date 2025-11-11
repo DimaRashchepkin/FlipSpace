@@ -17,6 +17,21 @@
                         </p>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="username" class="form-label text-white">
+                            <i class="bi bi-person me-2"></i>Никнейм
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control form-control-lg bg-dark text-white border-secondary" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Ваш никнейм"
+                            required
+                            autocomplete="username"
+                        >
+                    </div>
+
                     <form method="POST" action="/register">
                         <div class="mb-3">
                             <label for="email" class="form-label text-white">
