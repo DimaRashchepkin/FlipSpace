@@ -4,36 +4,37 @@
 <div class="min-vh-100 d-flex flex-column" style="overflow-y: auto;">
     {% include "../meta/header.html" %}
     
-    <div class="container flex-grow-1 d-flex align-items-center justify-content-center py-5">
+    <div class="container flex-grow-1 d-flex align-items-center justify-content-center py-3">
         <div class="row w-100 justify-content-center">
             <div class="col-12 col-md-6 col-lg-5 col-xl-4">
-                <div class="feature-card p-4 p-md-5 rounded-4">
-                    <div class="text-center mb-4">
+                <div class="feature-card p-3 p-md-4 rounded-4">
+                    <div class="text-center mb-3">
                         <h2 class="text-white fw-bold mb-2">
-                            Регистрация в <span class="animate-text">FlipSpace</span>
+                            Регистрация
                         </h2>
                         <p class="text-light opacity-75">
                             Создайте аккаунт и начните учиться эффективнее
                         </p>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="username" class="form-label text-white">
-                            <i class="bi bi-person me-2"></i>Никнейм
-                        </label>
-                        <input 
-                            type="text" 
-                            class="form-control form-control-lg bg-dark text-white border-secondary" 
-                            id="username" 
-                            name="username" 
-                            placeholder="Ваш никнейм"
-                            required
-                            autocomplete="username"
-                        >
-                    </div>
-
                     <form method="POST" action="/register">
-                        <div class="mb-3">
+
+                        <div class="mb-2">
+                            <label for="username" class="form-label text-white">
+                                <i class="bi bi-person me-2"></i>Никнейм
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control form-control-lg bg-dark text-white border-secondary" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Ваш никнейм"
+                                required
+                                autocomplete="username"
+                            >
+                        </div>
+
+                        <div class="mb-2">
                             <label for="email" class="form-label text-white">
                                 <i class="bi bi-envelope me-2"></i>Email
                             </label>
@@ -48,7 +49,7 @@
                             >
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <label for="password" class="form-label text-white">
                                 <i class="bi bi-lock me-2"></i>Пароль
                             </label>
@@ -63,7 +64,7 @@
                             >
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="confirm_password" class="form-label text-white">
                                 <i class="bi bi-lock-fill me-2"></i>Подтвердите пароль
                             </label>

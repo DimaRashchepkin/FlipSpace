@@ -10,7 +10,7 @@
                 <div class="feature-card p-4 p-md-5 rounded-4">
                     <div class="text-center mb-4">
                         <h2 class="text-white fw-bold mb-2">
-                            Вход в <span class="animate-text">FlipSpace</span>
+                            Вход
                         </h2>
                         <p class="text-light opacity-75">
                             Добро пожаловать! Войдите в свой аккаунт
@@ -88,50 +88,4 @@
 
     {% include "../meta/footer.html" %}
 </div>
-
-<script>
-    const passwordInput = document.getElementById('password');
-    const toggleBtn = document.getElementById('togglePasswordBtn');
-    const toggleIcon = document.getElementById('toggleIcon');
-
-    // Показываем/скрываем кнопку при вводе
-    passwordInput.addEventListener('input', function() {
-        if (passwordInput.value.length > 0) {
-            toggleBtn.classList.add('show');
-        } else {
-            toggleBtn.classList.remove('show');
-            passwordInput.type = 'password';
-            toggleIcon.classList.remove('bi-eye-slash');
-            toggleIcon.classList.add('bi-eye');
-        }
-    });
-
-    // При фокусе - показываем кнопку если есть текст
-    passwordInput.addEventListener('focus', function() {
-        if (passwordInput.value.length > 0) {
-            toggleBtn.classList.add('show');
-        }
-    });
-
-    // При потере фокуса - скрываем пароль и кнопку
-    passwordInput.addEventListener('blur', function() {
-        toggleBtn.classList.remove('show');
-        passwordInput.type = 'password';
-        toggleIcon.classList.remove('bi-eye-slash');
-        toggleIcon.classList.add('bi-eye');
-    });
-
-    // Переключение видимости пароля
-    toggleBtn.addEventListener('click', function() {
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleIcon.classList.remove('bi-eye');
-            toggleIcon.classList.add('bi-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            toggleIcon.classList.remove('bi-eye-slash');
-            toggleIcon.classList.add('bi-eye');
-        }
-    });
-</script>
 {% endblock %}
