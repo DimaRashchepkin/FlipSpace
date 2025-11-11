@@ -23,5 +23,11 @@ fun Application.configureTemplating() {
         get("/") {
             call.respond(PebbleContent("common/front.html", emptyMap()))
         }
+        get("/login") {
+            call.respond(PebbleContent("authentication/login.html", emptyMap()))
+        }
+        get("/register") {
+            call.respond(PebbleContent("authentication/register.html", emptyMap()))
+        }
     }
 }
