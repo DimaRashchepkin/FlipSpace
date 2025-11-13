@@ -1,0 +1,22 @@
+name: Testing
+on:
+  [ push, pull_request ]
+
+jobs:
+  Testing:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "This job is now running on a ${{ runner.os }} server"
+      - run: echo "Branch - ${{ github.ref }}, repository - ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v5
+
+      - name: Fix permissions
+        run:
+          chmod +x ./gradlew
+      - name: Testing
+        run:
+          ./gradlew test
+
+      - run: echo "Status - ${{ job.status }}."
