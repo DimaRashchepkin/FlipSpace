@@ -123,18 +123,19 @@ class DatabaseService(private val connection: Connection) {
     }
 
     suspend fun getRandomCardByPriority(): Card? = withContext(Dispatchers.IO) {
+        // Выбор случайной карточки с учетом приоритета
         val sql = """
-            WITH weighted_cards AS (
-                SELECT id, author_id, content, priority,
-                       SUM(priority) OVER (ORDER BY id) as cumulative_weight
-                FROM cards
-            )
-            SELECT id, author_id, content, priority
-            FROM weighted_cards
-            WHERE cumulative_weight >= (SELECT random() * (SELECT SUM(priority) FROM cards))
-            ORDER BY cumulative_weight
-            LIMIT 1
-        """.trimIndent()
+        WITH weighted_cards AS (
+            SELECT id, author_id, content, priority,
+                   SUM(priority) OVER (ORDER BY id) as cumulative_weight
+            FROM cards
+        )
+        SELECT id, author_id, content, priority
+        FROM weighted_cards
+        WHERE cumulative_weight >= (SELECT random() * (SELECT SUM(priority) FROM cards))
+        ORDER BY cumulative_weight
+        LIMIT 1
+    """.trimIndent()
 
         val statement = connection.prepareStatement(sql)
         val resultSet = statement.executeQuery()
@@ -146,7 +147,8 @@ class DatabaseService(private val connection: Connection) {
             val priority = resultSet.getInt("priority")
             return@withContext Card(cardId, authorId, content, priority)
         } else {
-            return getFirstCard()
+            // Если запрос не вернул результатов, вернуть первую карточку
+            return@withContext getFirstCard()
         }
     }
 
