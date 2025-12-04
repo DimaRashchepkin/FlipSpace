@@ -120,7 +120,7 @@ body {
   transition: all var(--transition-normal);
 }
 
-.feature-card:hover {
+.feature-card:hover:not(:has(form)) {
   transform: translateY(-5px);
   background: rgba(255, 255, 255, 0.15);
   box-shadow: var(--shadow-heavy);
@@ -175,4 +175,46 @@ body {
 
 .border-radius-lg {
   border-radius: var(--border-radius-lg);
+}
+
+/* Styles for form inputs */
+.form-control {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  transition: all var(--transition-normal);
+}
+
+.form-control:focus {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Fixing browser autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Light grey placeholder */
+.form-control::placeholder {
+  color: #adb5bd;
+  opacity: 1;
+}
+
+.form-control::-webkit-input-placeholder {
+  color: #adb5bd;
+}
+
+.form-control::-moz-placeholder {
+  color: #adb5bd;
+}
+
+.form-control:-ms-input-placeholder {
+  color: #adb5bd;
 }
