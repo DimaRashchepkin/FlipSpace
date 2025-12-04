@@ -120,7 +120,7 @@ body {
   transition: all var(--transition-normal);
 }
 
-.feature-card:hover {
+.feature-card:hover:not(:has(form)) {
   transform: translateY(-5px);
   background: rgba(255, 255, 255, 0.15);
   box-shadow: var(--shadow-heavy);
