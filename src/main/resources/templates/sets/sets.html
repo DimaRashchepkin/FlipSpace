@@ -1,0 +1,196 @@
+{% extends "../meta/base.html" %}
+{% block title %}Мои наборы карточек | FlipSpace{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex flex-column" style="overflow-y: auto;">
+    {% include "../meta/header.html" %}
+
+    <!-- Основной контент -->
+    <div class="container py-5 flex-grow-1">
+        <!-- Заголовок -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-white mb-3">
+                <i class="bi bi-collection-play me-3"></i>Мои наборы карточек
+            </h1>
+            <p class="text-light opacity-75 lead">
+                {% if set_of_cards is not empty %}
+                Выберите набор для изучения. Нажмите на любой набор, чтобы начать обучение.
+                {% else %}
+                Создайте свой первый набор карточек для эффективного обучения.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Статистика и кнопка создания -->
+        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center mb-4">
+            <div class="mb-3 mb-md-0">
+                <div class="glass-effect border-glass p-3 rounded-4 d-inline-block">
+                    <span class="text-light">
+                        <i class="bi bi-card-checklist me-2 text-primary"></i>
+                        Всего наборов: <span class="fw-bold">{{ total_sets|default('0') }}</span>
+                    </span>
+                </div>
+            </div>
+            <a href="/sets/create" class="btn btn-primary btn-lg px-5 btn-glow">
+                <i class="bi bi-plus-circle me-2"></i>
+                Создать новый набор
+            </a>
+        </div>
+
+        <!-- Поиск -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <form method="GET" action="/sets" class="input-group input-group-lg">
+            <span class="input-group-text glass-effect border-glass text-light">
+                <i class="bi bi-search"></i>
+            </span>
+                    <input type="text" name="search"
+                           class="form-control glass-effect text-light border-glass"
+                           placeholder="Поиск наборов по названию..."
+                           value="{{ search_query|default('') }}">
+                    <button class="btn btn-outline-light glass-effect border-glass" type="submit">
+                        <i class="bi bi-search"></i> Найти
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Сетка наборов в виде больших кнопок -->
+        <div class="row g-4 mb-5">
+            {% if set_of_cards is not empty %}
+            {% for set in set_of_cards %}
+            <div class="col-xl-3 col-lg-4 col-md-6 d-flex">
+                <!-- Карточка-кнопка набора -->
+                <a href="/study/{{ set.id }}" class="set-card-btn d-flex flex-column w-100 text-decoration-none">
+                    <div class="card glass-effect border-glass text-center flex-grow-1 hover-lift p-4 d-flex flex-column">
+                        <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+                            <div class="flex-grow-1 d-flex flex-column">
+                                <!-- Название набора с ограничением длины -->
+                                <div class="set-title-container mb-3 d-flex align-items-center justify-content-center" style="min-height: 80px;">
+                                    <h4 class="text-white m-0 fw-semibold text-truncate-3-lines">
+                                        {% if set.title|length > 50 %}
+                                        {{ set.title|slice(0, 50) }}...
+                                        {% else %}
+                                        {{ set.title|default('Без названия') }}
+                                        {% endif %}
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Индикатор начала обучения -->
+                        <div class="card-footer glass-effect border-top-0 text-center py-3 mt-auto">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <span class="text-light me-2">Начать обучение</span>
+                                <i class="bi bi-arrow-right text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+            {% else %}
+            <!-- Состояние при отсутствии наборов -->
+            <div class="col-12 text-center py-5">
+                <div class="empty-state p-5 rounded-4 glass-effect border-dashed">
+                    <i class="bi bi-card-checklist display-1 text-secondary mb-4"></i>
+                    <h3 class="text-white mb-3">У вас пока нет наборов карточек</h3>
+                    <p class="text-light opacity-75 mb-4 lead">
+                        Создайте свой первый набор, чтобы начать эффективное обучение
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if total_pages and total_pages > 1 %}
+        <nav aria-label="Навигация по страницам">
+            <ul class="pagination justify-content-center">
+                <!-- Кнопка "Назад" -->
+                <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                    {% if current_page > 1 %}
+                    <a class="page-link glass-effect border-glass text-light h-100 d-flex align-items-center"
+                       href="?page={{ current_page - 1 }}" aria-label="Предыдущая">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                    {% else %}
+                    <span class="page-link glass-effect border-glass text-secondary h-100 d-flex align-items-center">
+                <i class="bi bi-chevron-left btn-primary"></i>
+            </span>
+                    {% endif %}
+                </li>
+
+                <!-- Номера страниц -->
+                {% set start_page = max(current_page - 2, 1) %}
+                {% set end_page = min(current_page + 2, total_pages) %}
+
+                {% if start_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link glass-effect border-glass text-light" href="?page=1">1</a>
+                </li>
+                {% if start_page > 2 %}
+                <li class="page-item disabled">
+                    <span class="page-link glass-effect border-glass text-secondary">...</span>
+                </li>
+                {% endif %}
+                {% endif %}
+
+                {% for i in start_page..end_page %}
+                <li class="page-item {% if i == current_page %}active{% endif %}">
+                    {% if i == current_page %}
+                    <span class="page-link glass-effect border-glass bg-primary btn-primary">
+                {{ i }}
+            </span>
+                    {% else %}
+                    <a class="page-link glass-effect border-glass text-light"
+                       href="?page={{ i }}">{{ i }}</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+
+                {% if end_page < total_pages %}
+                {% if end_page < total_pages - 1 %}
+                <li class="page-item disabled">
+                    <span class="page-link glass-effect border-glass text-secondary">...</span>
+                </li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link glass-effect border-glass text-light"
+                       href="?page={{ total_pages }}">{{ total_pages }}</a>
+                </li>
+                {% endif %}
+
+                <!-- Кнопка "Вперед" -->
+                <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                    {% if current_page < total_pages %}
+                    <a class="page-link glass-effect border-glass text-light h-100 d-flex align-items-center"
+                       href="?page={{ current_page + 1 }}" aria-label="Следующая">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    {% else %}
+                    <span class="page-link glass-effect border-glass text-secondary h-100 d-flex align-items-center">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                    {% endif %}
+                </li>
+            </ul>
+
+            <!-- Информация о странице -->
+            <div class="text-center text-light opacity-75 mt-3">
+                <small>
+                    {% if set_of_cards is not empty %}
+                    Показано {{ ((current_page - 1) * per_page) + 1 }}-
+                    {{ ((current_page - 1) * per_page) + set_of_cards|length }}
+                    из {{ total_sets }} наборов
+                    {% else %}
+                    Нет наборов для отображения
+                    {% endif %}
+                </small>
+            </div>
+        </nav>
+        {% endif %}
+    </div>
+
+    {% include "../meta/footer.html" %}
+</div>
+{% endblock %}

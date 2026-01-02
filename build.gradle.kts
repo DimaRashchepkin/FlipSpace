@@ -30,6 +30,9 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    implementation(libs.ktor.server.call.logging)
+    implementation(libs.ktor.server.request.validation)
+    implementation(libs.pebble)
 }
 
 ktlint {
