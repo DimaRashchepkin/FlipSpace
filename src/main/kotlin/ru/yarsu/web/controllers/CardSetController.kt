@@ -1,9 +1,15 @@
 package ru.yarsu.web.controllers
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.pebble.PebbleContent
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import ru.yarsu.models.Card
+import ru.yarsu.models.CardSet
 import ru.yarsu.services.CardSetService
 
 @Suppress("MagicNumber")
@@ -34,6 +40,114 @@ class CardSetController(private val cardSetService: CardSetService) {
             )
 
             call.respond(PebbleContent("sets/sets.html", model))
+        }
+
+        route.get("/sets/create") {
+            call.respond(PebbleContent("sets/new-set.html", mapOf()))
+        }
+
+        route.get("/sets/config") {
+            val setId = call.request.queryParameters["id"]
+
+            if (setId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                return@get
+            }
+
+            val cardSet = cardSetService.getSetById(setId)
+            if (cardSet == null) {
+                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                return@get
+            }
+
+            val model = mapOf(
+                "set_id" to cardSet.id,
+                "set_title" to cardSet.title,
+                "cards" to cardSet.content
+            )
+
+            call.respond(PebbleContent("sets/config-set.html", model))
+        }
+
+        route.post("/create-set") {
+            val parameters = call.receiveParameters()
+            val title = parameters["title"] ?: ""
+            val isPrivate = parameters["is_private"] != null
+
+            // TODO: Получить userId из сессии, пока используем тестовый
+            val userId = "test_user_1"
+
+            val cardSet = CardSet(
+                userId = userId,
+                title = title,
+                description = null,
+                content = emptyList()
+            )
+
+            val result = cardSetService.createSet(cardSet)
+
+            result.onSuccess { createdSet ->
+                call.respondRedirect("/sets/config?id=${createdSet.id}")
+            }.onFailure { error ->
+                val model = mapOf(
+                    "error" to (error.message ?: "Произошла ошибка при создании набора"),
+                    "title" to title,
+                    "is_private" to isPrivate
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/new-set.html", model))
+            }
+        }
+
+        route.post("/sets/save") {
+            val parameters = call.receiveParameters()
+            val setId = parameters["set_id"] ?: ""
+
+            if (setId.isBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                return@post
+            }
+
+            val existingSet = cardSetService.getSetById(setId)
+            if (existingSet == null) {
+                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                return@post
+            }
+
+            // Собираем карточки из параметров
+            val cards = mutableListOf<Card>()
+            var index = 0
+
+            while (parameters.contains("cards[$index].question") || parameters.contains("cards[$index].answer")) {
+                val frontText = parameters["cards[$index].question"] ?: ""
+                val backText = parameters["cards[$index].answer"] ?: ""
+
+                if (frontText.isNotBlank() || backText.isNotBlank()) {
+                    cards.add(
+                        Card(
+                            setId = setId,
+                            frontText = frontText,
+                            backText = backText
+                        )
+                    )
+                }
+                index++
+            }
+
+            // Обновляем набор с новыми карточками
+            val updatedSet = existingSet.copy(content = cards)
+            val result = cardSetService.updateSet(updatedSet)
+
+            result.onSuccess {
+                call.respondRedirect("/sets")
+            }.onFailure { error ->
+                val model = mapOf(
+                    "error" to (error.message ?: "Произошла ошибка при сохранении набора"),
+                    "set_id" to setId,
+                    "set_title" to existingSet.title,
+                    "cards" to cards
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/config-set.html", model))
+            }
         }
     }
 }

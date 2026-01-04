@@ -8,7 +8,7 @@ import kotlin.math.min
 @Suppress("MagicNumber")
 class TestCardSetService : CardSetService {
 
-    private val allSets = generateTestCardSets(50)
+    private val allSets = generateTestCardSets(50).toMutableList()
 
     override fun getAllSets(): List<CardSet> = allSets
 
@@ -26,6 +26,49 @@ class TestCardSetService : CardSetService {
     override fun searchSetsPaginated(query: String, page: Int, perPage: Int): PaginatedResult<CardSet> {
         val filteredSets = searchSets(query)
         return createPaginatedResult(filteredSets, page, perPage)
+    }
+
+    override fun createSet(cardSet: CardSet): Result<CardSet> {
+        return try {
+            if (cardSet.title.isBlank()) {
+                return Result.failure(IllegalArgumentException("Название набора не может быть пустым"))
+            }
+
+            if (cardSet.title.length > 100) {
+                return Result.failure(IllegalArgumentException("Название набора не может превышать 100 символов"))
+            }
+
+            allSets.add(cardSet)
+            Result.success(cardSet)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun getSetById(id: String): CardSet? {
+        return allSets.find { it.id == id }
+    }
+
+    override fun updateSet(cardSet: CardSet): Result<CardSet> {
+        return try {
+            if (cardSet.title.isBlank()) {
+                return Result.failure(IllegalArgumentException("Название набора не может быть пустым"))
+            }
+
+            if (cardSet.title.length > 100) {
+                return Result.failure(IllegalArgumentException("Название набора не может превышать 100 символов"))
+            }
+
+            val index = allSets.indexOfFirst { it.id == cardSet.id }
+            if (index == -1) {
+                return Result.failure(IllegalArgumentException("Набор с ID ${cardSet.id} не найден"))
+            }
+
+            allSets[index] = cardSet
+            Result.success(cardSet)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     private fun createPaginatedResult(sets: List<CardSet>, page: Int, perPage: Int): PaginatedResult<CardSet> {
