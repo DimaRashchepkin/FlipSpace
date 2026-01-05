@@ -5,18 +5,49 @@ on:
 jobs:
   Testing:
     runs-on: ubuntu-latest
+
     steps:
       - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "This job is now running on a ${{ runner.os }} server"
       - run: echo "Branch - ${{ github.ref }}, repository - ${{ github.repository }}."
+
       - name: Check out repository code
         uses: actions/checkout@v5
 
+      - name: Set up Docker Compose
+        run: |
+          docker-compose --version
+
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose up -d
+          # Ожидание готовности БД
+          for i in {1..30}; do
+            if docker-compose ps | grep -q "Up"; then
+              echo "Services are up!"
+              break
+            fi
+            echo "Waiting for services..."
+            sleep 5
+          done
+          timeout 60 bash -c 'until nc -z localhost 5432; do sleep 2; done'
+
       - name: Fix permissions
-        run:
-          chmod +x ./gradlew
-      - name: Testing
-        run:
-          ./gradlew test
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        run: ./gradlew test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+
+      - name: View logs if tests fail
+        if: failure()
+        run: docker-compose logs
+
+      - name: Stop services
+        if: always()
+        run: docker-compose down -v
 
       - run: echo "Status - ${{ job.status }}."
