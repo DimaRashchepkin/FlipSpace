@@ -33,7 +33,7 @@ data class UserResponse(val id: Int, val login: String)
 data class CardResponse(val id: Int, val authorId: Int, val content: String, val priority: Int)
 
 @Serializable
-data class CardSetResponse(val id: String, val userId: String, val title: String, val description: String)
+data class CardSetResponse(val id: String, val userId: Int, val title: String, val description: String)
 
 @Serializable
 data class HealthResponse(
@@ -69,7 +69,7 @@ fun Application.configureRouting() {
                         <li><a href="/cards">/cards</a> - Все карточки</li>
                         <li><a href="/cards/random">/cards/random</a> - Случайная карточка</li>
                         <li><a href="/sets">/sets</a> - Наборы карточек текущего пользователя</li>
-                        <li><a href="/sets/by-user/12345">/sets/by-user/12345</a> - Наборы конкретного пользователя</li>
+                        <li><a href="/sets/by-user/3">/sets/by-user/3</a> - Наборы конкретного пользователя</li>
                         <li><a href="/json/kotlinx-serialization">/json/kotlinx-serialization</a> - Тест сериализации</li>
                     </ul>
                 </body>
@@ -330,7 +330,7 @@ fun Application.configureRouting() {
         route("/sets") {
             get {
                 try {
-                    val userId = "12345"
+                    val userId = 3
                     val cardSets = dbService.getCardSetsByUser(userId)
                     val cardSetResponses = cardSets.map { cardSet ->
                         CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
@@ -356,7 +356,7 @@ fun Application.configureRouting() {
             post("/create") {
                 try {
                     val parameters = call.request.queryParameters
-                    val userId = parameters["userId"] ?: "12345"
+                    val userId = parameters["userId"]?.toInt() ?: 3
                     val title = parameters["title"] ?: "New Card Set"
                     val description = parameters["description"] ?: ""
 
@@ -381,7 +381,7 @@ fun Application.configureRouting() {
 
             get("/by-user/{userId}") {
                 try {
-                    val userId = call.parameters["userId"]
+                    val userId = call.parameters["userId"]?.toInt()
                         ?: throw IllegalArgumentException("User ID is required")
 
                     val cardSets = dbService.getCardSetsByUser(userId)

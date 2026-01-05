@@ -8,7 +8,7 @@ import ru.yarsu.models.CardSet
 @Suppress("MagicNumber")
 class TestCardSetService(private val databaseService: DatabaseService) : CardSetService {
 
-    private val allSets = fetchCardSetsFromDatabase("12345")
+    private val allSets = fetchCardSetsFromDatabase(3)
 
     override fun getAllSets(): List<CardSet> = allSets
 
@@ -59,7 +59,7 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         )
     }
 
-    private fun fetchCardSetsFromDatabase(userId: String): List<CardSet> {
+    private fun fetchCardSetsFromDatabase(userId: Int): List<CardSet> {
         val dbCardSets = databaseService.getCardSetsByUser(userId)
         return dbCardSets.map { dbCardSet ->
             CardSet(

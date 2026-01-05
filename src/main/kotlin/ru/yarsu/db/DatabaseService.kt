@@ -11,7 +11,7 @@ class Card(val id: Int, val authorId: Int, val content: String, val priority: In
 
 class CardCreateRequest(val authorId: Int, val content: String, val priority: Int)
 
-class CardSet(val id: String, val userId: String, val title: String, val description: String)
+class CardSet(val id: String, val userId: Int, val title: String, val description: String)
 
 class DatabaseService(private val connection: Connection) {
 
@@ -208,16 +208,16 @@ class DatabaseService(private val connection: Connection) {
         return cards
     }
 
-    fun getCardSetsByUser(userId: String): List<CardSet> {
+    fun getCardSetsByUser(userId: Int): List<CardSet> {
         val sql = "SELECT id, user_id, title, description FROM card_sets WHERE user_id = ? ORDER BY created_at DESC"
         val statement = connection.prepareStatement(sql)
-        statement.setString(1, userId)
+        statement.setInt(1, userId)
         val resultSet = statement.executeQuery()
 
         val cardSets = ArrayList<CardSet>()
         while (resultSet.next()) {
             val id = resultSet.getString("id")
-            val userId = resultSet.getString("user_id")
+            val userId = resultSet.getInt("user_id")
             val title = resultSet.getString("title")
             val description = resultSet.getString("description")
             cardSets.add(CardSet(id, userId, title, description))
@@ -233,7 +233,7 @@ class DatabaseService(private val connection: Connection) {
         val cardSets = ArrayList<CardSet>()
         while (resultSet.next()) {
             val id = resultSet.getString("id")
-            val userId = resultSet.getString("user_id")
+            val userId = resultSet.getInt("user_id")
             val title = resultSet.getString("title")
             val description = resultSet.getString("description")
             cardSets.add(CardSet(id, userId, title, description))
@@ -241,13 +241,13 @@ class DatabaseService(private val connection: Connection) {
         return cardSets
     }
 
-    fun createCardSet(userId: String, title: String, description: String): String {
+    fun createCardSet(userId: Int, title: String, description: String): String {
         val sql = "INSERT INTO card_sets (id, user_id, title, description) VALUES (?, ?, ?, ?)"
         val statement = connection.prepareStatement(sql)
 
         val id = java.util.UUID.randomUUID().toString()
         statement.setString(1, id)
-        statement.setString(2, userId)
+        statement.setInt(2, userId)
         statement.setString(3, title)
         statement.setString(4, description)
 
