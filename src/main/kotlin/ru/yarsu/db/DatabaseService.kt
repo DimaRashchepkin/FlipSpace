@@ -6,8 +6,11 @@ import java.sql.Statement
 import java.util.ArrayList
 
 class User(val id: Int, val login: String, val password: String)
+
 class Card(val id: Int, val authorId: Int, val content: String, val priority: Int)
+
 class CardCreateRequest(val authorId: Int, val content: String, val priority: Int)
+
 class CardSet(val id: String, val userId: String, val title: String, val description: String)
 
 class DatabaseService(private val connection: Connection) {
@@ -17,7 +20,6 @@ class DatabaseService(private val connection: Connection) {
         statement.execute("SELECT 1")
     }
 
-    // User operations
     fun createUser(login: String, password: String): Int {
         val sql = "INSERT INTO users (login, password) VALUES (?, ?)"
         val statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
@@ -80,7 +82,6 @@ class DatabaseService(private val connection: Connection) {
         return users
     }
 
-    // Card operations
     fun createCard(cardRequest: CardCreateRequest): Int {
         val sql = "INSERT INTO cards (author_id, content, priority) VALUES (?, ?, ?)"
         val statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
@@ -207,7 +208,6 @@ class DatabaseService(private val connection: Connection) {
         return cards
     }
 
-    // CardSet operations
     fun getCardSetsByUser(userId: String): List<CardSet> {
         val sql = "SELECT id, user_id, title, description FROM card_sets WHERE user_id = ? ORDER BY created_at DESC"
         val statement = connection.prepareStatement(sql)

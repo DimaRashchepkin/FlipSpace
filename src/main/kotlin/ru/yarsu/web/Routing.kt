@@ -2,35 +2,28 @@ package ru.yarsu.web
 
 import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticResources
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import kotlinx.serialization.Serializable
 import ru.yarsu.db.CardCreateRequest
 import ru.yarsu.db.DatabaseFactory
-import kotlinx.serialization.Serializable
 import ru.yarsu.getDatabaseService
-
-/*fun Application.configureRouting() {
-    routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
-        staticResources("/static", "static")
-    }
-}*/
-
-
 
 @Serializable
 data class ApiResponse<T>(
     val status: String,
     val message: String,
-    val data: T? = null
+    val data: T? = null,
 )
 
 @Serializable
 data class ErrorResponse(
     val status: String,
-    val error: String
+    val error: String,
 )
 
 @Serializable
@@ -46,7 +39,7 @@ data class CardSetResponse(val id: String, val userId: String, val title: String
 data class HealthResponse(
     val status: String,
     val database: String,
-    val timestamp: Long
+    val timestamp: Long,
 )
 
 @Serializable
@@ -63,7 +56,8 @@ fun Application.configureRouting() {
 
     routing {
         get("/") {
-            call.respondText("""
+            call.respondText(
+                """
                 <html>
                 <head><title>FlipSpace API</title></head>
                 <body>
@@ -80,10 +74,10 @@ fun Application.configureRouting() {
                     </ul>
                 </body>
                 </html>
-            """.trimIndent())
+            """.trimIndent(),
+            )
         }
 
-        // Маршрут для проверки здоровья базы данных
         get("/health") {
             try {
                 val connection = DatabaseFactory.getConnection()
@@ -91,44 +85,48 @@ fun Application.configureRouting() {
                 statement.execute("SELECT 1")
                 connection.close()
 
-                call.respond(HealthResponse(
-                    status = "healthy",
-                    database = "connected",
-                    timestamp = System.currentTimeMillis()
-                ))
+                call.respond(
+                    HealthResponse(
+                        status = "healthy",
+                        database = "connected",
+                        timestamp = System.currentTimeMillis(),
+                    ),
+                )
             } catch (e: Exception) {
-                call.respond(HealthResponse(
-                    status = "unhealthy",
-                    database = "disconnected",
-                    timestamp = System.currentTimeMillis()
-                ))
+                call.respond(
+                    HealthResponse(
+                        status = "unhealthy",
+                        database = "disconnected",
+                        timestamp = System.currentTimeMillis(),
+                    ),
+                )
             }
         }
 
-        // Маршруты для работы с пользователями
         route("/users") {
-            // Получить всех пользователей
             get {
                 try {
                     val users = dbService.getAllUsers()
-                    // Конвертируем внутренние User в UserResponse
                     val userResponses = users.map { user ->
                         UserResponse(user.id, user.login)
                     }
-                    call.respond(ApiResponse(
-                        status = "success",
-                        message = "Users retrieved successfully",
-                        data = userResponses
-                    ))
+                    call.respond(
+                        ApiResponse(
+                            status = "success",
+                            message = "Users retrieved successfully",
+                            data = userResponses,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get users: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get users: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Создать нового пользователя (через query parameters)
             post("/create") {
                 try {
                     val parameters = call.request.queryParameters
@@ -136,20 +134,23 @@ fun Application.configureRouting() {
                     val password = parameters["password"] ?: "default_password"
 
                     val userId = dbService.createUser(login, password)
-                    call.respond(CreateUserResponse(
-                        status = "success",
-                        userId = userId,
-                        login = login
-                    ))
+                    call.respond(
+                        CreateUserResponse(
+                            status = "success",
+                            userId = userId,
+                            login = login,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to create user: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to create user: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Найти пользователя по логину
             get("/by-login/{login}") {
                 try {
                     val login = call.parameters["login"]
@@ -158,50 +159,56 @@ fun Application.configureRouting() {
                     val user = dbService.getUserByLogin(login)
 
                     if (user != null) {
-                        call.respond(ApiResponse(
-                            status = "success",
-                            message = "User found",
-                            data = UserResponse(user.id, user.login)
-                        ))
+                        call.respond(
+                            ApiResponse(
+                                status = "success",
+                                message = "User found",
+                                data = UserResponse(user.id, user.login),
+                            ),
+                        )
                     } else {
-                        call.respond(ErrorResponse(
-                            status = "not_found",
-                            error = "User with login '$login' not found"
-                        ))
+                        call.respond(
+                            ErrorResponse(
+                                status = "not_found",
+                                error = "User with login '$login' not found",
+                            ),
+                        )
                     }
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get user: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get user: ${e.message}",
+                        ),
+                    )
                 }
             }
         }
 
-        // Маршруты для работы с карточками
         route("/cards") {
-            // Получить все карточки
             get {
                 try {
                     val cards = dbService.getAllCards()
-                    // Конвертируем внутренние Card в CardResponse
                     val cardResponses = cards.map { card ->
                         CardResponse(card.id, card.authorId, card.content, card.priority)
                     }
-                    call.respond(ApiResponse(
-                        status = "success",
-                        message = "Cards retrieved successfully",
-                        data = cardResponses
-                    ))
+                    call.respond(
+                        ApiResponse(
+                            status = "success",
+                            message = "Cards retrieved successfully",
+                            data = cardResponses,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get cards: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get cards: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Создать новую карточку (через query parameters)
             post("/create") {
                 try {
                     val parameters = call.request.queryParameters
@@ -212,45 +219,53 @@ fun Application.configureRouting() {
                     val cardRequest = CardCreateRequest(authorId, content, priority)
                     val cardId = dbService.createCard(cardRequest)
 
-                    call.respond(CreateCardResponse(
-                        status = "success",
-                        cardId = cardId,
-                        authorId = authorId
-                    ))
+                    call.respond(
+                        CreateCardResponse(
+                            status = "success",
+                            cardId = cardId,
+                            authorId = authorId,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to create card: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to create card: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Получить случайную карточку (с учетом приоритета)
             get("/random") {
                 try {
                     val randomCard = dbService.getRandomCardByPriority()
 
                     if (randomCard != null) {
-                        call.respond(ApiResponse(
-                            status = "success",
-                            message = "Random card retrieved",
-                            data = CardResponse(randomCard.id, randomCard.authorId, randomCard.content, randomCard.priority)
-                        ))
+                        call.respond(
+                            ApiResponse(
+                                status = "success",
+                                message = "Random card retrieved",
+                                data = CardResponse(randomCard.id, randomCard.authorId, randomCard.content, randomCard.priority),
+                            ),
+                        )
                     } else {
-                        call.respond(ErrorResponse(
-                            status = "empty",
-                            error = "No cards available in database"
-                        ))
+                        call.respond(
+                            ErrorResponse(
+                                status = "empty",
+                                error = "No cards available in database",
+                            ),
+                        )
                     }
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get random card: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get random card: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Получить карточки по автору
             get("/by-author/{authorId}") {
                 try {
                     val authorId = call.parameters["authorId"]?.toInt()
@@ -261,20 +276,23 @@ fun Application.configureRouting() {
                         CardResponse(card.id, card.authorId, card.content, card.priority)
                     }
 
-                    call.respond(ApiResponse(
-                        status = "success",
-                        message = "Cards retrieved for author $authorId",
-                        data = cardResponses
-                    ))
+                    call.respond(
+                        ApiResponse(
+                            status = "success",
+                            message = "Cards retrieved for author $authorId",
+                            data = cardResponses,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get cards by author: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get cards by author: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Получить карточку по ID
             get("/{id}") {
                 try {
                     val id = call.parameters["id"]?.toInt()
@@ -283,53 +301,58 @@ fun Application.configureRouting() {
                     val card = dbService.getCardById(id)
 
                     if (card != null) {
-                        call.respond(ApiResponse(
-                            status = "success",
-                            message = "Card found",
-                            data = CardResponse(card.id, card.authorId, card.content, card.priority)
-                        ))
+                        call.respond(
+                            ApiResponse(
+                                status = "success",
+                                message = "Card found",
+                                data = CardResponse(card.id, card.authorId, card.content, card.priority),
+                            ),
+                        )
                     } else {
-                        call.respond(ErrorResponse(
-                            status = "not_found",
-                            error = "Card with ID $id not found"
-                        ))
+                        call.respond(
+                            ErrorResponse(
+                                status = "not_found",
+                                error = "Card with ID $id not found",
+                            ),
+                        )
                     }
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get card: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get card: ${e.message}",
+                        ),
+                    )
                 }
             }
         }
 
-        // Маршруты для работы с наборами карточек
         route("/sets") {
-            // Получить все наборы текущего пользователя
             get {
                 try {
-                    // TODO: Получать userId из сессии/токена
-                    // Пока используем тестовый ID "12345"
                     val userId = "12345"
                     val cardSets = dbService.getCardSetsByUser(userId)
                     val cardSetResponses = cardSets.map { cardSet ->
                         CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
                     }
 
-                    call.respond(ApiResponse(
-                        status = "success",
-                        message = "Card sets retrieved for user $userId",
-                        data = cardSetResponses
-                    ))
+                    call.respond(
+                        ApiResponse(
+                            status = "success",
+                            message = "Card sets retrieved for user $userId",
+                            data = cardSetResponses,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get card sets: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get card sets: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Создать новый набор (через query parameters)
             post("/create") {
                 try {
                     val parameters = call.request.queryParameters
@@ -339,20 +362,23 @@ fun Application.configureRouting() {
 
                     val setId = dbService.createCardSet(userId, title, description)
 
-                    call.respond(CreateCardSetResponse(
-                        status = "success",
-                        setId = setId,
-                        title = title
-                    ))
+                    call.respond(
+                        CreateCardSetResponse(
+                            status = "success",
+                            setId = setId,
+                            title = title,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to create card set: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to create card set: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Получить наборы по ID пользователя
             get("/by-user/{userId}") {
                 try {
                     val userId = call.parameters["userId"]
@@ -363,20 +389,23 @@ fun Application.configureRouting() {
                         CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
                     }
 
-                    call.respond(ApiResponse(
-                        status = "success",
-                        message = "Card sets for user $userId",
-                        data = cardSetResponses
-                    ))
+                    call.respond(
+                        ApiResponse(
+                            status = "success",
+                            message = "Card sets for user $userId",
+                            data = cardSetResponses,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get card sets: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get card sets: ${e.message}",
+                        ),
+                    )
                 }
             }
 
-            // Получить все наборы (для отладки)
             get("/all") {
                 try {
                     val cardSets = dbService.getAllCardSets()
@@ -384,21 +413,24 @@ fun Application.configureRouting() {
                         CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
                     }
 
-                    call.respond(ApiResponse(
-                        status = "success",
-                        message = "All card sets",
-                        data = cardSetResponses
-                    ))
+                    call.respond(
+                        ApiResponse(
+                            status = "success",
+                            message = "All card sets",
+                            data = cardSetResponses,
+                        ),
+                    )
                 } catch (e: Exception) {
-                    call.respond(ErrorResponse(
-                        status = "error",
-                        error = "Failed to get all card sets: ${e.message}"
-                    ))
+                    call.respond(
+                        ErrorResponse(
+                            status = "error",
+                            error = "Failed to get all card sets: ${e.message}",
+                        ),
+                    )
                 }
             }
         }
 
-        // Статические ресурсы
         staticResources("/static", "static")
     }
 }

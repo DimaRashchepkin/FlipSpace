@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15
+    image: postgres:16-alpine  # Используем более легкую версию
     container_name: flipspace_db
     environment:
       POSTGRES_DB: flipspace
@@ -13,12 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - flipspace_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
-
-networks:
-  flipspace_network:
-    driver: bridge
