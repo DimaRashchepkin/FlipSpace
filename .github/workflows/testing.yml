@@ -6,48 +6,56 @@ jobs:
   Testing:
     runs-on: ubuntu-latest
 
-    steps:
-      - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "This job is now running on a ${{ runner.os }} server"
-      - run: echo "Branch - ${{ github.ref }}, repository - ${{ github.repository }}."
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: flipspace
+          POSTGRES_USER: flipspace_user
+          POSTGRES_PASSWORD: flipspace_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
+    steps:
       - name: Check out repository code
         uses: actions/checkout@v5
 
-      - name: Set up Docker Compose
+      - name: Wait for PostgreSQL
         run: |
-          docker-compose --version
+          echo "Waiting for PostgreSQL to be ready..."
+          timeout 30 bash -c 'until echo > /dev/tcp/localhost/5432; do sleep 2; done'
+          echo "PostgreSQL is ready!"
 
-      - name: Start services with Docker Compose
+      - name: Verify database connection
         run: |
-          docker-compose up -d
-          # Ожидание готовности БД
-          for i in {1..30}; do
-            if docker-compose ps | grep -q "Up"; then
-              echo "Services are up!"
-              break
-            fi
-            echo "Waiting for services..."
-            sleep 5
-          done
-          timeout 60 bash -c 'until nc -z localhost 5432; do sleep 2; done'
+          # Установка клиента PostgreSQL для проверки
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+          echo "Testing database connection..."
+          PGPASSWORD=flipspace_password psql -h localhost -p 5432 -U flipspace_user -d flipspace -c "SELECT version();"
 
-      - name: Fix permissions
+      - name: Fix permissions for Gradle wrapper
         run: chmod +x ./gradlew
 
       - name: Run tests
-        run: ./gradlew test
+        run: ./gradlew test --info
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/flipspace
+          SPRING_DATASOURCE_USERNAME: flipspace_user
+          SPRING_DATASOURCE_PASSWORD: flipspace_password
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate  # или update для тестов
 
-      - name: View logs if tests fail
-        if: failure()
-        run: docker-compose logs
-
-      - name: Stop services
+      - name: Upload test results
         if: always()
-        run: docker-compose down -v
-
-      - run: echo "Status - ${{ job.status }}."
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            build/reports/tests/
+            build/test-results/
