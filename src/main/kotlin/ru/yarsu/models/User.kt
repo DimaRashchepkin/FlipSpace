@@ -1,14 +1,13 @@
 package ru.yarsu.models
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import java.util.*
+import java.util.UUID
 
 @Serializable
 data class User(
-    val id: String = UUID.randomUUID().toString(),
+    val id: Int,
     val login: String,
-    @Transient
+    @kotlinx.serialization.Transient
     val passwordHash: String = "",
     val createdAt: Long = System.currentTimeMillis(),
 )

@@ -1,4 +1,3 @@
-// ru.yarsu/web/Templating.kt
 package ru.yarsu.web
 
 import io.ktor.server.application.Application
@@ -10,6 +9,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.pebbletemplates.pebble.loader.ClasspathLoader
+import ru.yarsu.getDatabaseService
 import ru.yarsu.services.TestCardSetService
 import ru.yarsu.web.controllers.CardSetController
 
@@ -22,7 +22,8 @@ fun Application.configureTemplating() {
         )
     }
 
-    val cardSetService = TestCardSetService()
+    val databaseService = getDatabaseService()
+    val cardSetService = TestCardSetService(databaseService)
     val cardSetController = CardSetController(cardSetService)
 
     routing {

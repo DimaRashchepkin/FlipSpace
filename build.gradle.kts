@@ -15,6 +15,13 @@ application {
 
 repositories {
     mavenCentral()
+    // Fallback repositories for CI/CD environments
+    maven {
+        url = uri("https://maven.google.com/")
+    }
+    maven {
+        url = uri("https://plugins.gradle.org/m2/")
+    }
 }
 
 dependencies {
@@ -33,6 +40,8 @@ dependencies {
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.request.validation)
     implementation(libs.pebble)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation(kotlin("stdlib"))
 }
 
 ktlint {

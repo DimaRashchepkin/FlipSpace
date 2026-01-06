@@ -5,18 +5,67 @@ on:
 jobs:
   Testing:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: flipspace
+          POSTGRES_USER: flipspace_user
+          POSTGRES_PASSWORD: flipspace_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
-      - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "This job is now running on a ${{ runner.os }} server"
-      - run: echo "Branch - ${{ github.ref }}, repository - ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v5
 
-      - name: Fix permissions
-        run:
-          chmod +x ./gradlew
-      - name: Testing
-        run:
-          ./gradlew test
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
 
-      - run: echo "Status - ${{ job.status }}."
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          timeout 30 bash -c 'until echo > /dev/tcp/localhost/5432; do sleep 2; done'
+          echo "PostgreSQL is ready!"
+
+      - name: Setup database
+        run: |
+          # Установка клиента PostgreSQL
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+          echo "Testing database connection..."
+          PGPASSWORD=flipspace_password psql -h localhost -p 5432 -U flipspace_user -d flipspace -c "SELECT version();"
+
+          echo "Initializing database schema..."
+          PGPASSWORD=flipspace_password psql -h localhost -p 5432 -U flipspace_user -d flipspace -f init.sql
+
+      - name: Fix permissions for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        run: ./gradlew test --info --no-daemon --max-workers=2 --init-script .github/init.gradle.kts
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/flipspace
+          SPRING_DATASOURCE_USERNAME: flipspace_user
+          SPRING_DATASOURCE_PASSWORD: flipspace_password
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate  # или update для тестов
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            build/reports/tests/
+            build/test-results/
