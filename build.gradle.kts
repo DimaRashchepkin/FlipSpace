@@ -15,6 +15,13 @@ application {
 
 repositories {
     mavenCentral()
+    // Fallback repositories for CI/CD environments
+    maven {
+        url = uri("https://maven.google.com/")
+    }
+    maven {
+        url = uri("https://plugins.gradle.org/m2/")
+    }
 }
 
 dependencies {
