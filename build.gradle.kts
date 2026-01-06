@@ -14,13 +14,11 @@ application {
 }
 
 repositories {
+    google()
+    gradlePluginPortal()
     mavenCentral()
-    // Fallback repositories for CI/CD environments
     maven {
-        url = uri("https://maven.google.com/")
-    }
-    maven {
-        url = uri("https://plugins.gradle.org/m2/")
+        url = uri("https://repo1.maven.org/maven2/")
     }
 }
 
