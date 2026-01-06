@@ -10,12 +10,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.sessions.clear
-import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
 import ru.yarsu.getDatabaseService
 import ru.yarsu.services.AuthService
 import ru.yarsu.web.UserSession
+import ru.yarsu.web.requireGuest
 
 fun Application.configureAuthRoutes() {
     val dbService = getDatabaseService()
@@ -23,7 +23,8 @@ fun Application.configureAuthRoutes() {
 
     routing {
         get("/register") {
-            handleRegisterGet()
+            if (!call.requireGuest()) return@get
+            call.respond(PebbleContent("authentication/register.html", mapOf<String, Any>()))
         }
 
         post("/register") {
@@ -31,7 +32,8 @@ fun Application.configureAuthRoutes() {
         }
 
         get("/login") {
-            handleLoginGet()
+            if (!call.requireGuest()) return@get
+            call.respond(PebbleContent("authentication/login.html", mapOf<String, Any>()))
         }
 
         post("/login") {
@@ -42,15 +44,6 @@ fun Application.configureAuthRoutes() {
             handleLogout()
         }
     }
-}
-
-private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterGet() {
-    val session = call.sessions.get<UserSession>()
-    if (session != null) {
-        call.respondRedirect("/sets")
-        return
-    }
-    call.respond(PebbleContent("authentication/register.html", mapOf<String, Any>()))
 }
 
 private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(authService: AuthService) {
@@ -88,11 +81,6 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
 }
 
 private suspend fun io.ktor.server.routing.RoutingContext.handleLoginGet() {
-    val session = call.sessions.get<UserSession>()
-    if (session != null) {
-        call.respondRedirect("/sets")
-        return
-    }
     call.respond(PebbleContent("authentication/login.html", mapOf<String, Any>()))
 }
 
