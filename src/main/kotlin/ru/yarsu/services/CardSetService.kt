@@ -7,6 +7,9 @@ interface CardSetService {
     fun searchSets(query: String): List<CardSet>
     fun getSetsPaginated(page: Int, perPage: Int): PaginatedResult<CardSet>
     fun searchSetsPaginated(query: String, page: Int, perPage: Int): PaginatedResult<CardSet>
+    fun createSet(cardSet: CardSet): Result<CardSet>
+    fun getSetById(id: String): CardSet?
+    fun updateSet(cardSet: CardSet): Result<CardSet>
 }
 
 data class PaginatedResult<T>(
