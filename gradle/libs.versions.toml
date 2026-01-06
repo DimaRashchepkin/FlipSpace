@@ -6,6 +6,7 @@ logback = "1.4.14"
 postgres = "42.7.8"
 ktlint = "11.6.1"
 detekt = "1.23.4"
+bcrypt = "0.10.2"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -22,7 +23,9 @@ ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref 
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor" }
+ktor-server-sessions = { module = "io.ktor:ktor-server-sessions", version.ref = "ktor" }
 pebble = { module = "io.pebbletemplates:pebble", version = "3.2.2" }
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

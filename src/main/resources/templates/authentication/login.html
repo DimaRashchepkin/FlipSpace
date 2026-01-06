@@ -17,19 +17,26 @@
                         </p>
                     </div>
 
-                    <form method="POST" action="/login">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="/login" autocomplete="off">
                         <div class="mb-3">
-                            <label for="email" class="form-label text-white">
-                                <i class="bi bi-envelope me-2"></i>Email
+                            <label for="login" class="form-label text-white">
+                                <i class="bi bi-person me-2"></i>Логин
                             </label>
-                            <input 
-                                type="email" 
-                                class="form-control form-control-lg bg-dark text-white border-secondary" 
-                                id="email" 
-                                name="email" 
-                                placeholder="example@mail.com"
+                            <input
+                                type="text"
+                                class="form-control form-control-lg bg-dark text-white border-secondary"
+                                id="login"
+                                name="login"
+                                placeholder="Ваш логин"
+                                value="{{ login }}"
                                 required
-                                autocomplete="email"
+                                autocomplete="username"
                             >
                         </div>
 
@@ -37,11 +44,11 @@
                             <label for="password" class="form-label text-white">
                                 <i class="bi bi-lock me-2"></i>Пароль
                             </label>
-                            <input 
-                                type="password" 
-                                class="form-control form-control-lg bg-dark text-white border-secondary" 
-                                id="password" 
-                                name="password" 
+                            <input
+                                type="password"
+                                class="form-control form-control-lg bg-dark text-white border-secondary"
+                                id="password"
+                                name="password"
                                 placeholder="••••••••"
                                 required
                                 autocomplete="current-password"
@@ -50,19 +57,16 @@
 
                         <div class="mb-4 d-flex justify-content-between align-items-center">
                             <div class="form-check">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    id="remember" 
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="remember"
                                     name="remember"
                                 >
                                 <label class="form-check-label text-light opacity-75" for="remember">
                                     Запомнить меня
                                 </label>
                             </div>
-                            <a href="/forgot-password" class="text-white text-decoration-none">
-                                Забыли пароль?
-                            </a>
                         </div>
 
                         <div class="d-grid mb-3">

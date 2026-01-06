@@ -8,7 +8,9 @@ import ru.yarsu.db.DatabaseService
 import ru.yarsu.db.configureDatabases
 import ru.yarsu.web.configureRouting
 import ru.yarsu.web.configureSerialization
+import ru.yarsu.web.configureSessions
 import ru.yarsu.web.configureTemplating
+import ru.yarsu.web.controllers.configureAuthRoutes
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -18,7 +20,9 @@ fun Application.module() {
     configureSerialization()
     configureDatabases()
     initDatabaseService()
+    configureSessions()
     configureTemplating()
+    configureAuthRoutes()
     configureRouting()
 }
 
