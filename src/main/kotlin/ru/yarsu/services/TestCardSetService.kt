@@ -8,11 +8,7 @@ import ru.yarsu.models.CardSet
 @Suppress("MagicNumber")
 class TestCardSetService(private val databaseService: DatabaseService) : CardSetService {
 
-<<<<<<< add-database-fixed
-    private val allSets = fetchCardSetsFromDatabase(3)
-=======
-    private val allSets = generateTestCardSets(50).toMutableList()
->>>>>>> master
+    private val allSets = fetchCardSetsFromDatabase(3).toMutableList()
 
     override fun getAllSets(): List<CardSet> = allSets
 
@@ -36,13 +32,6 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         return createPaginatedResult(filteredSets, page, perPage)
     }
 
-<<<<<<< add-database-fixed
-    private fun createPaginatedResult(
-        sets: List<CardSet>,
-        page: Int,
-        perPage: Int,
-    ): PaginatedResult<CardSet> {
-=======
     override fun createSet(cardSet: CardSet): Result<CardSet> {
         return try {
             if (cardSet.title.isBlank()) {
@@ -86,8 +75,11 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         }
     }
 
-    private fun createPaginatedResult(sets: List<CardSet>, page: Int, perPage: Int): PaginatedResult<CardSet> {
->>>>>>> master
+    private fun createPaginatedResult(
+        sets: List<CardSet>,
+        page: Int,
+        perPage: Int,
+    ): PaginatedResult<CardSet> {
         val totalItems = sets.size
         val totalPages = if (totalItems > 0) ceil(totalItems.toDouble() / perPage).toInt() else 1
         val currentPage = page.coerceIn(1, totalPages)
@@ -115,7 +107,7 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         return dbCardSets.map { dbCardSet ->
             CardSet(
                 id = dbCardSet.id,
-                userId = dbCardSet.userId,
+                userId = dbCardSet.userId.toString(),
                 title = dbCardSet.title,
                 description = dbCardSet.description,
                 content = emptyList(),

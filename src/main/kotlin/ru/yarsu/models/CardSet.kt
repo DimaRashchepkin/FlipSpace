@@ -6,7 +6,7 @@ import java.util.UUID
 @Serializable
 data class CardSet(
     val id: String = UUID.randomUUID().toString(),
-    val userId: Int,
+    val userId: String,
     val title: String,
     val description: String? = null,
     var content: List<Card> = emptyList(),
