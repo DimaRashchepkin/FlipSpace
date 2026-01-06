@@ -1,0 +1,90 @@
+{% extends "../meta/base.html" %}
+{% block title %}Создать набор карточек - FlipSpace{% endblock %}
+{% block content %}
+<div class="min-vh-100 d-flex flex-column" style="overflow-y: auto;">
+    {% include "../meta/header.html" %}
+
+    <div class="container flex-grow-1 d-flex align-items-center justify-content-center py-5">
+        <div class="row w-100 justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="feature-card p-4 p-md-5 rounded-4">
+                    <div class="text-center mb-4">
+                        <h2 class="text-white fw-bold mb-2">
+                            Создать новый набор
+                        </h2>
+                        <p class="text-light opacity-75">
+                            Создайте новый набор карточек для эффективного обучения
+                        </p>
+                    </div>
+
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="/create-set">
+                        <div class="mb-4">
+                            <label for="title" class="form-label text-white">
+                                <i class="bi bi-card-heading me-2"></i>Название набора
+                            </label>
+                            <input
+                                    type="text"
+                                    class="form-control form-control-lg bg-dark text-white border-secondary"
+                                    id="title"
+                                    name="title"
+                                    value="{{ title | default('') }}"
+                                    placeholder="Например: Английские слова"
+                                    required
+                                    autocomplete="off"
+                                    maxlength="100"
+                            >
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        role="switch"
+                                        id="is_private"
+                                        name="is_private"
+                                        {% if is_private %}checked{% endif %}
+                                >
+                                <label class="form-check-label text-white" for="is_private">
+                                    <i class="bi bi-lock-fill me-2"></i>
+                                    Приватный набор
+                                </label>
+                            </div>
+                            <div class="form-text text-light opacity-75 mt-1">
+                                Приватные наборы видны только вам
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3 mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg btn-glow">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Создать набор
+                            </button>
+
+                            <a href="/sets" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Вернуться к моим наборам
+                            </a>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="text-light mb-0 opacity-75">
+                                После создания вы сможете добавить карточки в набор
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "../meta/footer.html" %}
+</div>
+{% endblock %}

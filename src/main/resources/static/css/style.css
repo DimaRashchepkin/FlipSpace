@@ -321,3 +321,67 @@ input:-webkit-autofill:active {
     transform: none;
 }
 
+
+/* Дополнительные стили для страницы создания набора */
+#cards-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+#cards-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#cards-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#cards-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+#cards-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.list-group-item {
+    background: rgba(255, 255, 255, 0.05);
+    transition: all var(--transition-normal);
+}
+
+.list-group-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.remove-card-btn {
+    transition: all var(--transition-normal);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.remove-card-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1);
+}
+
+/* Стили для полей ввода */
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .create-set-row {
+        flex-direction: column;
+    }
+
+    #cards-list {
+        max-height: 200px;
+        margin-bottom: 1.5rem;
+    }
+}
+
