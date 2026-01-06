@@ -1,6 +1,7 @@
 package ru.yarsu.services
 
 import ru.yarsu.db.DatabaseService
+import ru.yarsu.models.Card
 import ru.yarsu.models.CardSet
 import kotlin.math.ceil
 import kotlin.math.min
@@ -12,15 +13,32 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
 
     override fun getAllSets(): List<CardSet> = allSets
 
+    override fun getAllSetsVisibleToUser(userId: String?): List<CardSet> {
+        return allSets.filter { set ->
+            !set.isPrivate || set.userId == userId
+        }
+    }
+
     override fun searchSets(query: String): List<CardSet> {
         return allSets.filter { set ->
-            set.title.contains(query, ignoreCase = true) ||
-                (set.description?.contains(query, ignoreCase = true) ?: false)
+            set.title.contains(query, ignoreCase = true)
+        }
+    }
+
+    override fun searchSetsVisibleToUser(query: String, userId: String?): List<CardSet> {
+        return allSets.filter { set ->
+            (!set.isPrivate || set.userId == userId) &&
+                set.title.contains(query, ignoreCase = true)
         }
     }
 
     override fun getSetsPaginated(page: Int, perPage: Int): PaginatedResult<CardSet> {
         return createPaginatedResult(allSets, page, perPage)
+    }
+
+    override fun getSetsPaginatedVisibleToUser(page: Int, perPage: Int, userId: String?): PaginatedResult<CardSet> {
+        val visibleSets = getAllSetsVisibleToUser(userId)
+        return createPaginatedResult(visibleSets, page, perPage)
     }
 
     override fun searchSetsPaginated(
@@ -29,6 +47,16 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         perPage: Int,
     ): PaginatedResult<CardSet> {
         val filteredSets = searchSets(query)
+        return createPaginatedResult(filteredSets, page, perPage)
+    }
+
+    override fun searchSetsPaginatedVisibleToUser(
+        query: String,
+        page: Int,
+        perPage: Int,
+        userId: String?,
+    ): PaginatedResult<CardSet> {
+        val filteredSets = searchSetsVisibleToUser(query, userId)
         return createPaginatedResult(filteredSets, page, perPage)
     }
 
@@ -42,15 +70,49 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
                 return Result.failure(IllegalArgumentException("Название набора не может превышать 100 символов"))
             }
 
-            allSets.add(cardSet)
-            Result.success(cardSet)
+            // Сохраняем в базу данных вместе с карточками
+            val createdId = databaseService.cardSets.createCardSet(
+                cardSet.userId,
+                cardSet.title,
+                cardSet.isPrivate,
+            )
+
+            // Сохраняем карточки
+            if (cardSet.content.isNotEmpty()) {
+                val dbCards = cardSet.content.map { card ->
+                    ru.yarsu.db.SetCard(
+                        id = card.id,
+                        setId = createdId,
+                        frontText = card.frontText,
+                        backText = card.backText,
+                    )
+                }
+                databaseService.cardSets.saveCardsForSet(createdId, dbCards)
+            }
+
+            val createdSet = cardSet.copy(id = createdId)
+            allSets.add(createdSet)
+            Result.success(createdSet)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     override fun getSetById(id: String): CardSet? {
-        return allSets.find { it.id == id }
+        val cardSet = allSets.find { it.id == id } ?: return null
+
+        // Загружаем карточки из базы данных
+        val dbCards = databaseService.cardSets.getCardsBySetId(id)
+        val cards = dbCards.map { dbCard ->
+            Card(
+                id = dbCard.id,
+                setId = dbCard.setId,
+                frontText = dbCard.frontText,
+                backText = dbCard.backText,
+            )
+        }
+
+        return cardSet.copy(content = cards)
     }
 
     override fun updateSet(cardSet: CardSet): Result<CardSet> {
@@ -67,6 +129,17 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
             if (index == -1) {
                 return Result.failure(IllegalArgumentException("Набор с ID ${cardSet.id} не найден"))
             }
+
+            // Сохраняем карточки в базу данных
+            val dbCards = cardSet.content.map { card ->
+                ru.yarsu.db.SetCard(
+                    id = card.id,
+                    setId = cardSet.id,
+                    frontText = card.frontText,
+                    backText = card.backText,
+                )
+            }
+            databaseService.cardSets.saveCardsForSet(cardSet.id, dbCards)
 
             allSets[index] = cardSet
             Result.success(cardSet)
@@ -109,7 +182,7 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
                 id = dbCardSet.id,
                 userId = dbCardSet.userId,
                 title = dbCardSet.title,
-                description = dbCardSet.description,
+                isPrivate = dbCardSet.isPrivate,
                 content = emptyList(),
             )
         }
