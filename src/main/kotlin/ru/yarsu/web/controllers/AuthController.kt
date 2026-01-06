@@ -47,7 +47,7 @@ fun Application.configureAuthRoutes() {
 private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterGet() {
     val session = call.sessions.get<UserSession>()
     if (session != null) {
-        call.respondRedirect("/")
+        call.respondRedirect("/sets")
         return
     }
     call.respond(PebbleContent("authentication/register.html", mapOf<String, Any>()))
@@ -74,7 +74,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
     result.fold(
         onSuccess = { userId ->
             call.sessions.set(UserSession(userId = userId, username = username))
-            call.respondRedirect("/")
+            call.respondRedirect("/sets")
         },
         onFailure = { error ->
             call.respond(
@@ -90,7 +90,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
 private suspend fun io.ktor.server.routing.RoutingContext.handleLoginGet() {
     val session = call.sessions.get<UserSession>()
     if (session != null) {
-        call.respondRedirect("/")
+        call.respondRedirect("/sets")
         return
     }
     call.respond(PebbleContent("authentication/login.html", mapOf<String, Any>()))
@@ -116,7 +116,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleLoginPost(authSe
     result.fold(
         onSuccess = { user ->
             call.sessions.set(UserSession(userId = user.id, username = user.login))
-            call.respondRedirect("/")
+            call.respondRedirect("/sets")
         },
         onFailure = { error ->
             call.respond(
