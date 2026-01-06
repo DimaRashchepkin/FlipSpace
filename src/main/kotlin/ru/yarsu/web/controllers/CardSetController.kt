@@ -1,6 +1,7 @@
 package ru.yarsu.web.controllers
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.encodeURLParameter
 import io.ktor.server.application.call
 import io.ktor.server.pebble.PebbleContent
 import io.ktor.server.request.receiveParameters
@@ -28,9 +29,9 @@ class CardSetController(private val cardSetService: CardSetService) {
             val searchQuery = call.request.queryParameters["search"]
 
             val result = if (!searchQuery.isNullOrBlank()) {
-                cardSetService.searchSetsPaginated(searchQuery, page, DEFAULT_PER_PAGE)
+                cardSetService.searchSetsPaginatedVisibleToUser(searchQuery, page, DEFAULT_PER_PAGE, session.userId)
             } else {
-                cardSetService.getSetsPaginated(page, DEFAULT_PER_PAGE)
+                cardSetService.getSetsPaginatedVisibleToUser(page, DEFAULT_PER_PAGE, session.userId)
             }
 
             val model = mapOf<String, Any>(
@@ -57,25 +58,41 @@ class CardSetController(private val cardSetService: CardSetService) {
 
         route.get("/sets/config") {
             val session = call.requireAuth() ?: return@get
+
+            // Проверяем, это новый набор или редактирование существующего
             val setId = call.request.queryParameters["id"]
+            val newTitle = call.request.queryParameters["new_title"]
+            val newIsPrivate = call.request.queryParameters["new_is_private"]?.toBoolean() ?: false
 
-            if (setId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+            if (setId.isNullOrBlank() && newTitle.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора или параметры нового набора не указаны")
                 return@get
             }
 
-            val cardSet = cardSetService.getSetById(setId)
-            if (cardSet == null) {
-                call.respond(HttpStatusCode.NotFound, "Набор не найден")
-                return@get
-            }
+            val model = if (!setId.isNullOrBlank()) {
+                // Редактирование существующего набора
+                val cardSet = cardSetService.getSetById(setId)
+                if (cardSet == null) {
+                    call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                    return@get
+                }
 
-            val model = mapOf<String, Any>(
-                "set_id" to cardSet.id,
-                "set_title" to cardSet.title,
-                "cards" to cardSet.content,
-                "username" to session.username,
-            )
+                mapOf<String, Any>(
+                    "set_id" to cardSet.id,
+                    "set_title" to cardSet.title,
+                    "cards" to cardSet.content,
+                    "username" to session.username,
+                    "is_existing" to true,
+                )
+            } else {
+                // Новый набор - параметры передаются через query params
+                mapOf<String, Any>(
+                    "set_title" to newTitle!!,
+                    "new_is_private" to newIsPrivate,
+                    "username" to session.username,
+                    "is_existing" to false,
+                )
+            }
 
             call.respond(PebbleContent("sets/config-set.html", model))
         }
@@ -87,43 +104,40 @@ class CardSetController(private val cardSetService: CardSetService) {
             val title = parameters["title"] ?: ""
             val isPrivate = parameters["is_private"] != null
 
-            val cardSet = CardSet(
-                userId = session.userId,
-                title = title,
-                description = null,
-                content = emptyList(),
-            )
-
-            val result = cardSetService.createSet(cardSet)
-
-            result.onSuccess { createdSet ->
-                call.respondRedirect("/sets/config?id=${createdSet.id}")
-            }.onFailure { error ->
+            // Валидация названия
+            if (title.isBlank()) {
                 val model = mapOf<String, Any>(
-                    "error" to (error.message ?: "Произошла ошибка при создании набора"),
+                    "error" to "Название набора не может быть пустым",
                     "title" to title,
                     "is_private" to isPrivate,
                     "username" to session.username,
                 )
                 call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/new-set.html", model))
+                return@post
             }
+
+            if (title.length > 100) {
+                val model = mapOf<String, Any>(
+                    "error" to "Название набора не может превышать 100 символов",
+                    "title" to title,
+                    "is_private" to isPrivate,
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/new-set.html", model))
+                return@post
+            }
+
+            // Перенаправляем на форму заполнения БЕЗ сохранения в базу
+            val encodedTitle = title.encodeURLParameter()
+            call.respondRedirect("/sets/config?new_title=$encodedTitle&new_is_private=$isPrivate")
         }
 
         route.post("/sets/save") {
             val session = call.requireAuth() ?: return@post
             val parameters = call.receiveParameters()
             val setId = parameters["set_id"] ?: ""
-
-            if (setId.isBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
-                return@post
-            }
-
-            val existingSet = cardSetService.getSetById(setId)
-            if (existingSet == null) {
-                call.respond(HttpStatusCode.NotFound, "Набор не найден")
-                return@post
-            }
+            val newTitle = parameters["new_title"] ?: ""
+            val newIsPrivate = parameters["new_is_private"]?.toBoolean() ?: false
 
             // Собираем карточки из параметров
             val cards = mutableListOf<Card>()
@@ -136,7 +150,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                 if (frontText.isNotBlank() || backText.isNotBlank()) {
                     cards.add(
                         Card(
-                            setId = setId,
+                            setId = setId.ifBlank { "" }, // Временный ID для новых наборов
                             frontText = frontText,
                             backText = backText,
                         ),
@@ -145,20 +159,63 @@ class CardSetController(private val cardSetService: CardSetService) {
                 index++
             }
 
-            // Обновляем набор с новыми карточками
-            val updatedSet = existingSet.copy(content = cards)
-            val result = cardSetService.updateSet(updatedSet)
+            // Проверка, что набор не пустой
+            if (cards.isEmpty()) {
+                val model = mapOf<String, Any>(
+                    "error" to "Невозможно сохранить пустой набор. Добавьте хотя бы одну карточку.",
+                    "set_title" to (if (setId.isBlank()) newTitle else ""),
+                    "new_is_private" to newIsPrivate,
+                    "cards" to cards,
+                    "username" to session.username,
+                    "is_existing" to setId.isNotBlank(),
+                )
+
+                if (setId.isNotBlank()) {
+                    model + ("set_id" to setId)
+                }
+
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/config-set.html", model))
+                return@post
+            }
+
+            // Определяем, это новый набор или обновление существующего
+            val result = if (setId.isBlank()) {
+                // Создаём новый набор вместе с карточками
+                val newCardSet = CardSet(
+                    userId = session.userId,
+                    title = newTitle,
+                    isPrivate = newIsPrivate,
+                    content = cards,
+                )
+                cardSetService.createSet(newCardSet)
+            } else {
+                // Обновляем существующий набор
+                val existingSet = cardSetService.getSetById(setId)
+                if (existingSet == null) {
+                    call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                    return@post
+                }
+
+                val updatedSet = existingSet.copy(content = cards)
+                cardSetService.updateSet(updatedSet)
+            }
 
             result.onSuccess {
                 call.respondRedirect("/sets")
             }.onFailure { error ->
                 val model = mapOf<String, Any>(
                     "error" to (error.message ?: "Произошла ошибка при сохранении набора"),
-                    "set_id" to setId,
-                    "set_title" to existingSet.title,
+                    "set_title" to (if (setId.isBlank()) newTitle else ""),
+                    "new_is_private" to newIsPrivate,
                     "cards" to cards,
                     "username" to session.username,
+                    "is_existing" to setId.isNotBlank(),
                 )
+
+                if (setId.isNotBlank()) {
+                    model + ("set_id" to setId)
+                }
+
                 call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/config-set.html", model))
             }
         }

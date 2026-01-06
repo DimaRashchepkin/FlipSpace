@@ -74,6 +74,10 @@
                 <!-- Основная форма -->
                 <form id="create-set-form" method="POST" action="/sets/save">
                     <input type="hidden" name="set_id" value="{{ set_id | default('') }}">
+                    {% if not is_existing %}
+                    <input type="hidden" name="new_title" value="{{ set_title | default('') }}">
+                    <input type="hidden" name="new_is_private" value="{{ new_is_private | default('false') }}">
+                    {% endif %}
                     <div class="glass-effect border-glass p-4 rounded-4">
 
                         <!-- Форма добавления карточки -->

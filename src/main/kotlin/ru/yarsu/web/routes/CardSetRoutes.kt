@@ -41,7 +41,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleGetCardSetsForCu
         val userId = DefaultValues.DEFAULT_USER_ID
         val cardSets = dbService.getCardSetsByUser(userId)
         val cardSetResponses = cardSets.map { cardSet ->
-            CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
+            CardSetResponse(cardSet.id, cardSet.userId, cardSet.title)
         }
 
         call.respond(
@@ -66,9 +66,9 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleCreateCardSet(db
         val parameters = call.request.queryParameters
         val userId = parameters["userId"] ?: DefaultValues.DEFAULT_USER_ID
         val title = parameters["title"] ?: "New Card Set"
-        val description = parameters["description"] ?: ""
+        val isPrivate = parameters["isPrivate"]?.toBoolean() ?: false
 
-        val setId = dbService.cardSets.createCardSet(userId, title, description)
+        val setId = dbService.cardSets.createCardSet(userId, title, isPrivate)
 
         call.respond(
             CreateCardSetResponse(
@@ -94,7 +94,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleGetCardSetsByUse
 
         val cardSets = dbService.getCardSetsByUser(userId)
         val cardSetResponses = cardSets.map { cardSet ->
-            CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
+            CardSetResponse(cardSet.id, cardSet.userId, cardSet.title)
         }
 
         call.respond(
@@ -125,7 +125,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleGetAllCardSets(d
     try {
         val cardSets = dbService.getAllCardSets()
         val cardSetResponses = cardSets.map { cardSet ->
-            CardSetResponse(cardSet.id, cardSet.userId, cardSet.title, cardSet.description)
+            CardSetResponse(cardSet.id, cardSet.userId, cardSet.title)
         }
 
         call.respond(

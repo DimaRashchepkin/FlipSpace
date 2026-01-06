@@ -35,7 +35,7 @@ data class UserResponse(val id: String, val login: String)
 data class CardResponse(val id: String, val authorId: String, val content: String, val priority: Int)
 
 @Serializable
-data class CardSetResponse(val id: String, val userId: String, val title: String, val description: String)
+data class CardSetResponse(val id: String, val userId: String, val title: String)
 
 @Serializable
 data class HealthResponse(

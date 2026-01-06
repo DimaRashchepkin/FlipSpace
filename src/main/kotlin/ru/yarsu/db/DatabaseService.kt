@@ -5,7 +5,7 @@ import java.sql.Connection
 class User(val id: String, val login: String, val password: String)
 class Card(val id: String, val authorId: String, val content: String, val priority: Int)
 class CardCreateRequest(val authorId: String, val content: String, val priority: Int)
-class CardSet(val id: String, val userId: String, val title: String, val description: String)
+class CardSet(val id: String, val userId: String, val title: String, val isPrivate: Boolean = false)
 
 class DatabaseService(connection: Connection) {
 
