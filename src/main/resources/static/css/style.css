@@ -385,3 +385,83 @@ textarea.form-control {
     }
 }
 
+/* Study page specific styles */
+
+/* Card animation */
+@keyframes cardFlip {
+    0% { transform: rotateY(0deg); }
+    50% { transform: rotateY(90deg); }
+    100% { transform: rotateY(0deg); }
+}
+
+.card-flip {
+    animation: cardFlip 0.6s ease;
+}
+
+/* Rating button colors */
+.btn-outline-danger.rating-btn:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.btn-outline-warning.rating-btn:hover {
+    background-color: #ffc107 !important;
+    color: black !important;
+}
+
+.btn-outline-secondary.rating-btn:hover {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+.btn-outline-info.rating-btn:hover {
+    background-color: #0dcaf0 !important;
+    color: white !important;
+}
+
+.btn-outline-success.rating-btn:hover {
+    background-color: #198754 !important;
+    color: white !important;
+}
+
+/* Progress bar animation */
+.progress-bar {
+    transition: width 0.5s ease;
+}
+
+/* Responsive buttons */
+@media (max-width: 768px) {
+    .rating-btn {
+        flex: 1 0 45%;
+        margin: 0.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .rating-btn {
+        flex: 1 0 100%;
+        margin: 0.25rem 0;
+    }
+}
+
+/* Highlight current card */
+.feature-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #667eea, transparent);
+    animation: slideLine 2s infinite;
+}
+
+@keyframes slideLine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
