@@ -9,12 +9,10 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
 import ru.yarsu.models.Card
 import ru.yarsu.models.CardSet
 import ru.yarsu.services.CardSetService
-import ru.yarsu.web.UserSession
+import ru.yarsu.web.requireAuth
 
 @Suppress("MagicNumber")
 class CardSetController(private val cardSetService: CardSetService) {
@@ -25,7 +23,7 @@ class CardSetController(private val cardSetService: CardSetService) {
 
     fun configureRoutes(route: Route) {
         route.get("/sets") {
-            val session = call.sessions.get<UserSession>()
+            val session = call.requireAuth() ?: return@get
             val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
             val searchQuery = call.request.queryParameters["search"]
 
@@ -35,35 +33,30 @@ class CardSetController(private val cardSetService: CardSetService) {
                 cardSetService.getSetsPaginated(page, DEFAULT_PER_PAGE)
             }
 
-            val model = mutableMapOf<String, Any>(
+            val model = mapOf<String, Any>(
                 "set_of_cards" to result.items,
                 "total_sets" to result.totalItems,
                 "current_page" to result.currentPage,
                 "total_pages" to result.totalPages,
                 "per_page" to result.perPage,
                 "search_query" to (searchQuery ?: ""),
+                "username" to session.username,
             )
-
-            session?.let {
-                model["username"] = it.username
-            }
 
             call.respond(PebbleContent("sets/sets.html", model))
         }
 
         route.get("/sets/create") {
-            val session = call.sessions.get<UserSession>()
-            val model = mutableMapOf<String, Any>()
-
-            session?.let {
-                model["username"] = it.username
-            }
+            val session = call.requireAuth() ?: return@get
+            val model = mapOf<String, Any>(
+                "username" to session.username,
+            )
 
             call.respond(PebbleContent("sets/new-set.html", model))
         }
 
         route.get("/sets/config") {
-            val session = call.sessions.get<UserSession>()
+            val session = call.requireAuth() ?: return@get
             val setId = call.request.queryParameters["id"]
 
             if (setId.isNullOrBlank()) {
@@ -77,25 +70,18 @@ class CardSetController(private val cardSetService: CardSetService) {
                 return@get
             }
 
-            val model = mutableMapOf<String, Any>(
+            val model = mapOf<String, Any>(
                 "set_id" to cardSet.id,
                 "set_title" to cardSet.title,
                 "cards" to cardSet.content,
+                "username" to session.username,
             )
-
-            session?.let {
-                model["username"] = it.username
-            }
 
             call.respond(PebbleContent("sets/config-set.html", model))
         }
 
         route.post("/create-set") {
-            val session = call.sessions.get<UserSession>()
-            if (session == null) {
-                call.respondRedirect("/login")
-                return@post
-            }
+            val session = call.requireAuth() ?: return@post
 
             val parameters = call.receiveParameters()
             val title = parameters["title"] ?: ""
@@ -113,7 +99,7 @@ class CardSetController(private val cardSetService: CardSetService) {
             result.onSuccess { createdSet ->
                 call.respondRedirect("/sets/config?id=${createdSet.id}")
             }.onFailure { error ->
-                val model = mutableMapOf<String, Any>(
+                val model = mapOf<String, Any>(
                     "error" to (error.message ?: "Произошла ошибка при создании набора"),
                     "title" to title,
                     "is_private" to isPrivate,
@@ -124,7 +110,7 @@ class CardSetController(private val cardSetService: CardSetService) {
         }
 
         route.post("/sets/save") {
-            val session = call.sessions.get<UserSession>()
+            val session = call.requireAuth() ?: return@post
             val parameters = call.receiveParameters()
             val setId = parameters["set_id"] ?: ""
 
@@ -166,15 +152,13 @@ class CardSetController(private val cardSetService: CardSetService) {
             result.onSuccess {
                 call.respondRedirect("/sets")
             }.onFailure { error ->
-                val model = mutableMapOf<String, Any>(
+                val model = mapOf<String, Any>(
                     "error" to (error.message ?: "Произошла ошибка при сохранении набора"),
                     "set_id" to setId,
                     "set_title" to existingSet.title,
                     "cards" to cards,
+                    "username" to session.username,
                 )
-                session?.let {
-                    model["username"] = it.username
-                }
                 call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/config-set.html", model))
             }
         }
