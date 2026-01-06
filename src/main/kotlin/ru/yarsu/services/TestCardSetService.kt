@@ -1,21 +1,21 @@
 package ru.yarsu.services
 
-import kotlin.math.ceil
-import kotlin.math.min
 import ru.yarsu.db.DatabaseService
 import ru.yarsu.models.CardSet
+import kotlin.math.ceil
+import kotlin.math.min
 
 @Suppress("MagicNumber")
 class TestCardSetService(private val databaseService: DatabaseService) : CardSetService {
 
-    private val allSets = fetchCardSetsFromDatabase(3).toMutableList()
+    private val allSets = fetchCardSetsFromDatabase("00000000-0000-0000-0000-000000000003").toMutableList()
 
     override fun getAllSets(): List<CardSet> = allSets
 
     override fun searchSets(query: String): List<CardSet> {
         return allSets.filter { set ->
             set.title.contains(query, ignoreCase = true) ||
-                    (set.description?.contains(query, ignoreCase = true) ?: false)
+                (set.description?.contains(query, ignoreCase = true) ?: false)
         }
     }
 
@@ -102,12 +102,12 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         )
     }
 
-    private fun fetchCardSetsFromDatabase(userId: Int): List<CardSet> {
+    private fun fetchCardSetsFromDatabase(userId: String): List<CardSet> {
         val dbCardSets = databaseService.getCardSetsByUser(userId)
         return dbCardSets.map { dbCardSet ->
             CardSet(
                 id = dbCardSet.id,
-                userId = dbCardSet.userId.toString(),
+                userId = dbCardSet.userId,
                 title = dbCardSet.title,
                 description = dbCardSet.description,
                 content = emptyList(),

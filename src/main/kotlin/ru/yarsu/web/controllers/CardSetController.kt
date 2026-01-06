@@ -63,7 +63,7 @@ class CardSetController(private val cardSetService: CardSetService) {
             val model = mapOf(
                 "set_id" to cardSet.id,
                 "set_title" to cardSet.title,
-                "cards" to cardSet.content
+                "cards" to cardSet.content,
             )
 
             call.respond(PebbleContent("sets/config-set.html", model))
@@ -81,7 +81,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                 userId = userId,
                 title = title,
                 description = null,
-                content = emptyList()
+                content = emptyList(),
             )
 
             val result = cardSetService.createSet(cardSet)
@@ -92,7 +92,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                 val model = mapOf(
                     "error" to (error.message ?: "Произошла ошибка при создании набора"),
                     "title" to title,
-                    "is_private" to isPrivate
+                    "is_private" to isPrivate,
                 )
                 call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/new-set.html", model))
             }
@@ -126,8 +126,8 @@ class CardSetController(private val cardSetService: CardSetService) {
                         Card(
                             setId = setId,
                             frontText = frontText,
-                            backText = backText
-                        )
+                            backText = backText,
+                        ),
                     )
                 }
                 index++
@@ -144,7 +144,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                     "error" to (error.message ?: "Произошла ошибка при сохранении набора"),
                     "set_id" to setId,
                     "set_title" to existingSet.title,
-                    "cards" to cards
+                    "cards" to cards,
                 )
                 call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/config-set.html", model))
             }

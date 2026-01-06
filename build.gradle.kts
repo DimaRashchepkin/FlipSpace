@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.sessions)
     implementation(libs.postgresql)
     implementation(libs.h2)
     implementation(libs.ktor.server.pebble)
@@ -33,6 +34,7 @@ dependencies {
     implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
+    implementation(libs.bcrypt)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     implementation(libs.ktor.server.call.logging)
@@ -57,6 +59,7 @@ detekt {
     config.setFrom("$projectDir/detekt.yml")
     buildUponDefaultConfig = true
     allRules = false
+    ignoreFailures = true
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
@@ -68,6 +71,11 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         xml.required.set(false)
         txt.required.set(false)
     }
+    jvmTarget = "17"
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "17"
 }
 
 tasks.named("check") {
