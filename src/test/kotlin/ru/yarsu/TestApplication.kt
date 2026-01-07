@@ -66,25 +66,21 @@ object TestDatabaseConnection {
                     """.trimIndent(),
                 )
 
+                // Legacy cards table for old Card API (author_id, content, priority)
                 stmt.execute(
                     """
                     CREATE TABLE cards (
                         id VARCHAR(36) PRIMARY KEY,
-                        set_id VARCHAR(36) NOT NULL,
-                        front_text TEXT NOT NULL,
-                        back_text TEXT NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        CONSTRAINT fk_cards_set
-                            FOREIGN KEY (set_id)
-                            REFERENCES card_sets(id)
-                            ON DELETE CASCADE
-                            ON UPDATE CASCADE
+                        author_id VARCHAR(36) NOT NULL,
+                        content TEXT NOT NULL,
+                        priority INT NOT NULL DEFAULT 1,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                     """.trimIndent(),
                 )
 
-                stmt.execute("CREATE INDEX idx_cards_set_id ON cards(set_id)")
+                stmt.execute("CREATE INDEX idx_cards_author_id ON cards(author_id)")
+                stmt.execute("CREATE INDEX idx_cards_priority ON cards(priority)")
                 stmt.execute("CREATE INDEX idx_card_sets_user_id ON card_sets(user_id)")
 
                 println("Test database schema created successfully")
