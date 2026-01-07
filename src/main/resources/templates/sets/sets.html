@@ -77,8 +77,15 @@
             {% for set in set_of_cards %}
             <div class="col-xl-3 col-lg-4 col-md-6 d-flex">
                 <!-- Карточка-кнопка набора -->
-                <a href="/study/{{ set.id }}" class="set-card-btn d-flex flex-column w-100 text-decoration-none">
-                    <div class="card glass-effect border-glass text-center flex-grow-1 hover-lift p-4 d-flex flex-column">
+                <div class="set-card-btn d-flex flex-column w-100 text-decoration-none">
+                    <div class="card glass-effect border-glass text-center flex-grow-1 p-4 d-flex flex-column position-relative" style="cursor: pointer;" onclick="window.location.href='/study/{{ set.id }}'">
+                        <!-- Кнопка редактирования в правом верхнем углу -->
+                        <a href="/sets/edit/{{ set.id }}" class="btn btn-sm btn-outline-light border-0 position-absolute"
+                           style="top: 10px; right: 10px; z-index: 10; background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px);"
+                           onclick="event.stopPropagation();"
+                           title="Редактировать набор">
+                            <i class="bi bi-gear-fill"></i>
+                        </a>
                         <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
                             <div class="flex-grow-1 d-flex flex-column">
                                 <!-- Название набора с ограничением длины -->
@@ -94,7 +101,7 @@
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
             {% endfor %}
             {% else %}

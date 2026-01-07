@@ -83,6 +83,7 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
                     ru.yarsu.db.SetCard(
                         id = card.id,
                         setId = createdId,
+                        title = card.title,
                         frontText = card.frontText,
                         backText = card.backText,
                     )
@@ -135,6 +136,7 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
                 ru.yarsu.db.SetCard(
                     id = card.id,
                     setId = cardSet.id,
+                    title = card.title,
                     frontText = card.frontText,
                     backText = card.backText,
                 )
