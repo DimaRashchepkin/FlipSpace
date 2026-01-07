@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.bcrypt)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.mockk)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.request.validation)
     implementation(libs.pebble)

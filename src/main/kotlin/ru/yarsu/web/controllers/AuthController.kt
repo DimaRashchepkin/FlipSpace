@@ -55,6 +55,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
     val validationError = ValidationHelpers.validateRegistration(username, password, confirmPassword)
     if (validationError != null) {
         call.respond(
+            io.ktor.http.HttpStatusCode.BadRequest,
             PebbleContent(
                 "authentication/register.html",
                 mapOf("error" to validationError.message, "username" to username),
@@ -71,6 +72,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
         },
         onFailure = { error ->
             call.respond(
+                io.ktor.http.HttpStatusCode.BadRequest,
                 PebbleContent(
                     "authentication/register.html",
                     mapOf("error" to (error.message ?: ""), "username" to username),
@@ -92,6 +94,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleLoginPost(authSe
     val validationError = ValidationHelpers.validateLogin(login, password)
     if (validationError != null) {
         call.respond(
+            io.ktor.http.HttpStatusCode.BadRequest,
             PebbleContent(
                 "authentication/login.html",
                 mapOf("error" to validationError.message, "login" to login),
@@ -108,6 +111,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleLoginPost(authSe
         },
         onFailure = { error ->
             call.respond(
+                io.ktor.http.HttpStatusCode.BadRequest,
                 PebbleContent(
                     "authentication/login.html",
                     mapOf("error" to (error.message ?: ""), "login" to login),
