@@ -9,7 +9,7 @@ import kotlin.math.min
 @Suppress("MagicNumber")
 class TestCardSetService(private val databaseService: DatabaseService) : CardSetService {
 
-    private val allSets = fetchCardSetsFromDatabase("00000000-0000-0000-0000-000000000003").toMutableList()
+    private val allSets = fetchAllCardSetsFromDatabase().toMutableList()
 
     override fun getAllSets(): List<CardSet> = allSets
 
@@ -108,6 +108,7 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
             Card(
                 id = dbCard.id,
                 setId = dbCard.setId,
+                title = dbCard.title,
                 frontText = dbCard.frontText,
                 backText = dbCard.backText,
             )
@@ -130,6 +131,9 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
             if (index == -1) {
                 return Result.failure(IllegalArgumentException("Набор с ID ${cardSet.id} не найден"))
             }
+
+            // Обновляем информацию о наборе в базе данных (title и is_private)
+            databaseService.cardSets.updateCardSet(cardSet.id, cardSet.title, cardSet.isPrivate)
 
             // Сохраняем карточки в базу данных
             val dbCards = cardSet.content.map { card ->
@@ -177,8 +181,8 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         )
     }
 
-    private fun fetchCardSetsFromDatabase(userId: String): List<CardSet> {
-        val dbCardSets = databaseService.getCardSetsByUser(userId)
+    private fun fetchAllCardSetsFromDatabase(): List<CardSet> {
+        val dbCardSets = databaseService.cardSets.getAllCardSets()
         return dbCardSets.map { dbCardSet ->
             CardSet(
                 id = dbCardSet.id,

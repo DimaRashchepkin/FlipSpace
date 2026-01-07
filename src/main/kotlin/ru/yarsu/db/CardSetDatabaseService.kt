@@ -139,6 +139,15 @@ class CardSetDatabaseService(private val connection: Connection) {
             null
         }
     }
+
+    fun updateCardSet(id: String, title: String, isPrivate: Boolean) {
+        val sql = "UPDATE card_sets SET title = ?, is_private = ? WHERE id = ?"
+        val statement = connection.prepareStatement(sql)
+        statement.setString(DatabaseConstants.FIRST_PARAMETER_INDEX, title)
+        statement.setBoolean(DatabaseConstants.SECOND_PARAMETER_INDEX, isPrivate)
+        statement.setString(DatabaseConstants.THIRD_PARAMETER_INDEX, id)
+        statement.executeUpdate()
+    }
 }
 
 class SetCard(val id: String, val setId: String, val title: String?, val frontText: String, val backText: String)
