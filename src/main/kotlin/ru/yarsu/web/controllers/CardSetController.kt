@@ -76,6 +76,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                 "search_query" to (searchQuery ?: ""),
                 "only_my_sets" to onlyMySets,
                 "username" to session.username,
+                "current_user_id" to session.userId,
             )
 
             call.respond(PebbleContent("sets/sets.html", model))
@@ -131,6 +132,110 @@ class CardSetController(private val cardSetService: CardSetService) {
             call.respond(PebbleContent("sets/config-set.html", model))
         }
 
+        route.get("/sets/edit/{setId}") {
+            val session = call.requireAuth() ?: return@get
+
+            val setId = call.parameters["setId"]
+            if (setId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                return@get
+            }
+
+            val cardSet = cardSetService.getSetById(setId)
+            if (cardSet == null) {
+                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                return@get
+            }
+
+            // Проверяем, что пользователь является владельцем набора
+            if (cardSet.userId != session.userId) {
+                call.respond(HttpStatusCode.Forbidden, "У вас нет прав на редактирование этого набора")
+                return@get
+            }
+
+            val model = mapOf<String, Any>(
+                "set_id" to cardSet.id,
+                "title" to cardSet.title,
+                "is_private" to cardSet.isPrivate,
+                "username" to session.username,
+            )
+
+            call.respond(PebbleContent("sets/edit-set.html", model))
+        }
+
+        route.post("/sets/edit/{setId}") {
+            val session = call.requireAuth() ?: return@post
+
+            val setId = call.parameters["setId"]
+            if (setId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                return@post
+            }
+
+            val cardSet = cardSetService.getSetById(setId)
+            if (cardSet == null) {
+                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                return@post
+            }
+
+            // Проверяем, что пользователь является владельцем набора
+            if (cardSet.userId != session.userId) {
+                call.respond(HttpStatusCode.Forbidden, "У вас нет прав на редактирование этого набора")
+                return@post
+            }
+
+            val parameters = call.receiveParameters()
+            val title = parameters["title"] ?: ""
+            val isPrivate = parameters["is_private"] != null
+
+            // Валидация названия
+            if (title.isBlank()) {
+                val model = mapOf<String, Any>(
+                    "error" to "Название набора не может быть пустым",
+                    "set_id" to setId,
+                    "title" to title,
+                    "is_private" to isPrivate,
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/edit-set.html", model))
+                return@post
+            }
+
+            if (title.length > 100) {
+                val model = mapOf<String, Any>(
+                    "error" to "Название набора не может превышать 100 символов",
+                    "set_id" to setId,
+                    "title" to title,
+                    "is_private" to isPrivate,
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/edit-set.html", model))
+                return@post
+            }
+
+            // Обновляем только название и приватность
+            val updatedSet = cardSet.copy(
+                title = title,
+                isPrivate = isPrivate,
+            )
+
+            val result = cardSetService.updateSet(updatedSet)
+
+            result.onSuccess {
+                // Перенаправляем на форму редактирования карточек
+                call.respondRedirect("/sets/config?id=$setId")
+            }.onFailure { error ->
+                val model = mapOf<String, Any>(
+                    "error" to (error.message ?: "Произошла ошибка при обновлении набора"),
+                    "set_id" to setId,
+                    "title" to title,
+                    "is_private" to isPrivate,
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/edit-set.html", model))
+            }
+        }
+
         route.post("/create-set") {
             val session = call.requireAuth() ?: return@post
 
@@ -178,6 +283,7 @@ class CardSetController(private val cardSetService: CardSetService) {
             var index = 0
 
             while (parameters.contains("cards[$index].question") || parameters.contains("cards[$index].answer")) {
+                val title = parameters["cards[$index].title"] ?: ""
                 val frontText = parameters["cards[$index].question"] ?: ""
                 val backText = parameters["cards[$index].answer"] ?: ""
 
@@ -185,6 +291,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                     cards.add(
                         Card(
                             setId = setId.ifBlank { "" }, // Временный ID для новых наборов
+                            title = title.ifBlank { null },
                             frontText = frontText,
                             backText = backText,
                         ),

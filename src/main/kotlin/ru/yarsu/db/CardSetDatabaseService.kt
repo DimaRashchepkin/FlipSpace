@@ -81,7 +81,7 @@ class CardSetDatabaseService(private val connection: Connection) {
     }
 
     fun getCardsBySetId(setId: String): List<SetCard> {
-        val sql = "SELECT id, set_id, front_text, back_text FROM cards WHERE set_id = ? ORDER BY created_at ASC"
+        val sql = "SELECT id, set_id, title, front_text, back_text FROM cards WHERE set_id = ? ORDER BY created_at ASC"
         val statement = connection.prepareStatement(sql)
         statement.setString(1, setId)
         val resultSet = statement.executeQuery()
@@ -90,9 +90,10 @@ class CardSetDatabaseService(private val connection: Connection) {
         while (resultSet.next()) {
             val id = resultSet.getString("id")
             val setIdFromDb = resultSet.getString("set_id")
+            val title = resultSet.getString("title")
             val frontText = resultSet.getString("front_text")
             val backText = resultSet.getString("back_text")
-            cards.add(SetCard(id, setIdFromDb, frontText, backText))
+            cards.add(SetCard(id, setIdFromDb, title, frontText, backText))
         }
         return cards
     }
@@ -106,14 +107,15 @@ class CardSetDatabaseService(private val connection: Connection) {
 
         // Добавляем новые карточки
         if (cards.isNotEmpty()) {
-            val insertSql = "INSERT INTO cards (id, set_id, front_text, back_text) VALUES (?, ?, ?, ?)"
+            val insertSql = "INSERT INTO cards (id, set_id, title, front_text, back_text) VALUES (?, ?, ?, ?, ?)"
             val insertStatement = connection.prepareStatement(insertSql)
 
             for (card in cards) {
                 insertStatement.setString(DatabaseConstants.FIRST_PARAMETER_INDEX, card.id)
                 insertStatement.setString(DatabaseConstants.SECOND_PARAMETER_INDEX, card.setId)
-                insertStatement.setString(DatabaseConstants.THIRD_PARAMETER_INDEX, card.frontText)
-                insertStatement.setString(DatabaseConstants.FOURTH_PARAMETER_INDEX, card.backText)
+                insertStatement.setString(DatabaseConstants.THIRD_PARAMETER_INDEX, card.title)
+                insertStatement.setString(DatabaseConstants.FOURTH_PARAMETER_INDEX, card.frontText)
+                insertStatement.setString(DatabaseConstants.FIFTH_PARAMETER_INDEX, card.backText)
                 insertStatement.addBatch()
             }
 
@@ -139,4 +141,4 @@ class CardSetDatabaseService(private val connection: Connection) {
     }
 }
 
-class SetCard(val id: String, val setId: String, val frontText: String, val backText: String)
+class SetCard(val id: String, val setId: String, val title: String?, val frontText: String, val backText: String)
