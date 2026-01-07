@@ -15,7 +15,7 @@
         <!-- Заголовок -->
         <div class="text-center mb-5">
             <h1 class="display-4 fw-bold text-white mb-3">
-                <i class="bi bi-plus-circle me-3"></i>Заполнение набора
+                Заполнение набора
             </h1>
             {% if set_title %}
             <p class="text-light opacity-75">{{ set_title }}</p>
@@ -58,7 +58,7 @@
                     </div>
                     {% else %}
                     <div id="cards-list" class="text-center py-5 flex-grow-1">
-                        <i class="bi bi-card-text display-4 text-secondary mb-3"></i>
+                        <i class="bi bi-card-text display-4 text-white mb-3"></i>
                         <p class="text-light opacity-75">Карточки пока не добавлены</p>
                     </div>
                     {% endif %}
@@ -74,6 +74,10 @@
                 <!-- Основная форма -->
                 <form id="create-set-form" method="POST" action="/sets/save">
                     <input type="hidden" name="set_id" value="{{ set_id | default('') }}">
+                    {% if not is_existing %}
+                    <input type="hidden" name="new_title" value="{{ set_title | default('') }}">
+                    <input type="hidden" name="new_is_private" value="{{ new_is_private | default('false') }}">
+                    {% endif %}
                     <div class="glass-effect border-glass p-4 rounded-4">
 
                         <!-- Форма добавления карточки -->

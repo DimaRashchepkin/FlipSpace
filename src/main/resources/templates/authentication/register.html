@@ -17,35 +17,27 @@
                         </p>
                     </div>
 
-                    <form method="POST" action="/register">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="/register" autocomplete="off">
 
                         <div class="mb-2">
                             <label for="username" class="form-label text-white">
-                                <i class="bi bi-person me-2"></i>Никнейм
+                                <i class="bi bi-person me-2"></i>Логин
                             </label>
-                            <input 
-                                type="text" 
-                                class="form-control form-control-lg bg-dark text-white border-secondary" 
-                                id="username" 
-                                name="username" 
-                                placeholder="Ваш никнейм"
+                            <input
+                                type="text"
+                                class="form-control form-control-lg bg-dark text-white border-secondary"
+                                id="username"
+                                name="username"
+                                placeholder="Ваш логин"
+                                value="{{ username }}"
                                 required
                                 autocomplete="username"
-                            >
-                        </div>
-
-                        <div class="mb-2">
-                            <label for="email" class="form-label text-white">
-                                <i class="bi bi-envelope me-2"></i>Email
-                            </label>
-                            <input 
-                                type="email" 
-                                class="form-control form-control-lg bg-dark text-white border-secondary" 
-                                id="email" 
-                                name="email" 
-                                placeholder="example@mail.com"
-                                required
-                                autocomplete="email"
                             >
                         </div>
 
@@ -53,11 +45,11 @@
                             <label for="password" class="form-label text-white">
                                 <i class="bi bi-lock me-2"></i>Пароль
                             </label>
-                            <input 
-                                type="password" 
-                                class="form-control form-control-lg bg-dark text-white border-secondary" 
-                                id="password" 
-                                name="password" 
+                            <input
+                                type="password"
+                                class="form-control form-control-lg bg-dark text-white border-secondary"
+                                id="password"
+                                name="password"
                                 placeholder="••••••••"
                                 required
                                 autocomplete="new-password"
@@ -68,11 +60,11 @@
                             <label for="confirm_password" class="form-label text-white">
                                 <i class="bi bi-lock-fill me-2"></i>Подтвердите пароль
                             </label>
-                            <input 
-                                type="password" 
-                                class="form-control form-control-lg bg-dark text-white border-secondary" 
-                                id="confirm_password" 
-                                name="confirm_password" 
+                            <input
+                                type="password"
+                                class="form-control form-control-lg bg-dark text-white border-secondary"
+                                id="confirm_password"
+                                name="confirm_password"
                                 placeholder="••••••••"
                                 required
                                 autocomplete="new-password"

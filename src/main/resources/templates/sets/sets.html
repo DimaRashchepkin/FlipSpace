@@ -1,5 +1,5 @@
 {% extends "../meta/base.html" %}
-{% block title %}Мои наборы карточек | FlipSpace{% endblock %}
+{% block title %}Наборы карточек | FlipSpace{% endblock %}
 {% block content %}
 <div class="min-vh-100 d-flex flex-column" style="overflow-y: auto;">
     {% include "../meta/header.html" %}
@@ -9,7 +9,7 @@
         <!-- Заголовок -->
         <div class="text-center mb-5">
             <h1 class="display-4 fw-bold text-white mb-3">
-                <i class="bi bi-collection-play me-3"></i>Мои наборы карточек
+                <i class="bi bi-collection-play me-3"></i>Наборы карточек
             </h1>
             <p class="text-light opacity-75 lead">
                 {% if set_of_cards is not empty %}
@@ -22,12 +22,21 @@
 
         <!-- Статистика и кнопка создания -->
         <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center mb-4">
-            <div class="mb-3 mb-md-0">
-                <div class="glass-effect border-glass p-3 rounded-4 d-inline-block">
+            <div class="mb-3 mb-md-0 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
+                <div class="glass-effect border-glass p-3 rounded-4">
                     <span class="text-light">
-                        <i class="bi bi-card-checklist me-2 text-primary"></i>
                         Всего наборов: <span class="fw-bold">{{ total_sets|default('0') }}</span>
                     </span>
+                </div>
+                <div class="glass-effect border-glass p-3 rounded-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="onlyMyCheckbox"
+                               {% if only_my_sets %}checked{% endif %}
+                               onchange="document.getElementById('filterForm').submit()">
+                        <label class="form-check-label text-light" for="onlyMyCheckbox">
+                            Только мои наборы
+                        </label>
+                    </div>
                 </div>
             </div>
             <a href="/sets/create" class="btn btn-primary btn-lg px-5 btn-glow">
@@ -35,6 +44,13 @@
                 Создать новый набор
             </a>
         </div>
+
+        <!-- Скрытая форма для фильтра -->
+        <form id="filterForm" method="GET" action="/sets" style="display: none;">
+            <input type="hidden" name="only_my" id="onlyMyInput" value="{% if only_my_sets %}true{% else %}false{% endif %}">
+            <input type="hidden" name="search" value="{{ search_query|default('') }}">
+            <input type="hidden" name="page" value="{{ current_page|default('1') }}">
+        </form>
 
         <!-- Поиск -->
         <div class="row mb-5">
@@ -47,8 +63,9 @@
                            class="form-control glass-effect text-light border-glass"
                            placeholder="Поиск наборов по названию..."
                            value="{{ search_query|default('') }}">
+                    <input type="hidden" name="only_my" value="{% if only_my_sets %}true{% else %}false{% endif %}">
                     <button class="btn btn-outline-light glass-effect border-glass" type="submit">
-                        <i class="bi bi-search"></i> Найти
+                        Найти
                     </button>
                 </form>
             </div>
@@ -84,7 +101,6 @@
             <!-- Состояние при отсутствии наборов -->
             <div class="col-12 text-center py-5">
                 <div class="empty-state p-5 rounded-4 glass-effect border-dashed">
-                    <i class="bi bi-card-checklist display-1 text-secondary mb-4"></i>
                     <h3 class="text-white mb-3">У вас пока нет наборов карточек</h3>
                     <p class="text-light opacity-75 mb-4 lead">
                         Создайте свой первый набор, чтобы начать эффективное обучение
@@ -96,13 +112,21 @@
 
         <!-- Пагинация -->
         {% if total_pages and total_pages > 1 %}
+        {% set base_url = "?page=" %}
+        {% set params = "" %}
+        {% if search_query %}
+            {% set params = params ~ "&search=" ~ search_query %}
+        {% endif %}
+        {% if only_my_sets %}
+            {% set params = params ~ "&only_my=true" %}
+        {% endif %}
         <nav aria-label="Навигация по страницам">
             <ul class="pagination justify-content-center">
                 <!-- Кнопка "Назад" -->
                 <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
                     {% if current_page > 1 %}
                     <a class="page-link glass-effect border-glass text-light h-100 d-flex align-items-center"
-                       href="?page={{ current_page - 1 }}" aria-label="Предыдущая">
+                       href="{{ base_url }}{{ current_page - 1 }}{{ params }}" aria-label="Предыдущая">
                         <i class="bi bi-chevron-left"></i>
                     </a>
                     {% else %}
@@ -118,7 +142,7 @@
 
                 {% if start_page > 1 %}
                 <li class="page-item">
-                    <a class="page-link glass-effect border-glass text-light" href="?page=1">1</a>
+                    <a class="page-link glass-effect border-glass text-light" href="{{ base_url }}1{{ params }}">1</a>
                 </li>
                 {% if start_page > 2 %}
                 <li class="page-item disabled">
@@ -135,7 +159,7 @@
             </span>
                     {% else %}
                     <a class="page-link glass-effect border-glass text-light"
-                       href="?page={{ i }}">{{ i }}</a>
+                       href="{{ base_url }}{{ i }}{{ params }}">{{ i }}</a>
                     {% endif %}
                 </li>
                 {% endfor %}
@@ -148,7 +172,7 @@
                 {% endif %}
                 <li class="page-item">
                     <a class="page-link glass-effect border-glass text-light"
-                       href="?page={{ total_pages }}">{{ total_pages }}</a>
+                       href="{{ base_url }}{{ total_pages }}{{ params }}">{{ total_pages }}</a>
                 </li>
                 {% endif %}
 
@@ -156,7 +180,7 @@
                 <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
                     {% if current_page < total_pages %}
                     <a class="page-link glass-effect border-glass text-light h-100 d-flex align-items-center"
-                       href="?page={{ current_page + 1 }}" aria-label="Следующая">
+                       href="{{ base_url }}{{ current_page + 1 }}{{ params }}" aria-label="Следующая">
                         <i class="bi bi-chevron-right"></i>
                     </a>
                     {% else %}
@@ -185,4 +209,14 @@
 
     {% include "../meta/footer.html" %}
 </div>
+
+<script>
+    // Обработка чекбокса фильтра
+    document.getElementById('onlyMyCheckbox').addEventListener('change', function() {
+        const filterForm = document.getElementById('filterForm');
+        const onlyMyInput = document.getElementById('onlyMyInput');
+        onlyMyInput.value = this.checked ? 'true' : 'false';
+        filterForm.submit();
+    });
+</script>
 {% endblock %}

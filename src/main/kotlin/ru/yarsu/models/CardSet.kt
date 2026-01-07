@@ -8,6 +8,6 @@ data class CardSet(
     val id: String = UUID.randomUUID().toString(),
     val userId: String,
     val title: String,
-    val description: String? = null,
+    val isPrivate: Boolean = false,
     var content: List<Card> = emptyList(),
 )
