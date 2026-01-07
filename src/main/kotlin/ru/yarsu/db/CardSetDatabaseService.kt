@@ -148,6 +148,13 @@ class CardSetDatabaseService(private val connection: Connection) {
         statement.setString(DatabaseConstants.THIRD_PARAMETER_INDEX, id)
         statement.executeUpdate()
     }
+
+    fun deleteCardSet(id: String) {
+        val sql = "DELETE FROM card_sets WHERE id = ?"
+        val statement = connection.prepareStatement(sql)
+        statement.setString(1, id)
+        statement.executeUpdate()
+    }
 }
 
 class SetCard(val id: String, val setId: String, val title: String?, val frontText: String, val backText: String)
