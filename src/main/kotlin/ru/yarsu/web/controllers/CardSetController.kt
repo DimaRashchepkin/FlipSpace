@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import ru.yarsu.models.Card
 import ru.yarsu.models.CardSet
 import ru.yarsu.services.CardSetService
+import ru.yarsu.services.PaginatedResult
 import ru.yarsu.web.requireAuth
 
 @Suppress("MagicNumber")
@@ -27,11 +28,41 @@ class CardSetController(private val cardSetService: CardSetService) {
             val session = call.requireAuth() ?: return@get
             val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
             val searchQuery = call.request.queryParameters["search"]
+            val onlyMySets = call.request.queryParameters["only_my"]?.toBoolean() ?: false
+
+            // Определяем userId для фильтрации: если только мои - передаем userId, иначе null для всех видимых
+            val filterUserId = if (onlyMySets) session.userId else null
 
             val result = if (!searchQuery.isNullOrBlank()) {
-                cardSetService.searchSetsPaginatedVisibleToUser(searchQuery, page, DEFAULT_PER_PAGE, session.userId)
+                if (onlyMySets) {
+                    // Если только мои - фильтруем по userId после поиска
+                    val allResults = cardSetService.searchSetsPaginatedVisibleToUser(searchQuery, page, DEFAULT_PER_PAGE, session.userId)
+                    val myResults = allResults.items.filter { it.userId == session.userId }
+                    PaginatedResult(
+                        items = myResults,
+                        totalItems = myResults.size,
+                        currentPage = allResults.currentPage,
+                        totalPages = if (myResults.isEmpty()) 1 else allResults.totalPages,
+                        perPage = allResults.perPage
+                    )
+                } else {
+                    cardSetService.searchSetsPaginatedVisibleToUser(searchQuery, page, DEFAULT_PER_PAGE, session.userId)
+                }
             } else {
-                cardSetService.getSetsPaginatedVisibleToUser(page, DEFAULT_PER_PAGE, session.userId)
+                if (onlyMySets) {
+                    // Если только мои - фильтруем по userId
+                    val allResults = cardSetService.getSetsPaginatedVisibleToUser(page, DEFAULT_PER_PAGE, session.userId)
+                    val myResults = allResults.items.filter { it.userId == session.userId }
+                    PaginatedResult(
+                        items = myResults,
+                        totalItems = myResults.size,
+                        currentPage = allResults.currentPage,
+                        totalPages = if (myResults.isEmpty()) 1 else allResults.totalPages,
+                        perPage = allResults.perPage
+                    )
+                } else {
+                    cardSetService.getSetsPaginatedVisibleToUser(page, DEFAULT_PER_PAGE, session.userId)
+                }
             }
 
             val model = mapOf<String, Any>(
@@ -41,6 +72,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                 "total_pages" to result.totalPages,
                 "per_page" to result.perPage,
                 "search_query" to (searchQuery ?: ""),
+                "only_my_sets" to onlyMySets,
                 "username" to session.username,
             )
 
