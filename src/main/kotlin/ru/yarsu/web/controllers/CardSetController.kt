@@ -76,6 +76,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                 "search_query" to (searchQuery ?: ""),
                 "only_my_sets" to onlyMySets,
                 "username" to session.username,
+                "current_user_id" to session.userId,
             )
 
             call.respond(PebbleContent("sets/sets.html", model))
