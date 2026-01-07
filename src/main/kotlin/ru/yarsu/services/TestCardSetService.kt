@@ -154,6 +154,25 @@ class TestCardSetService(private val databaseService: DatabaseService) : CardSet
         }
     }
 
+    override fun deleteSet(id: String): Result<Unit> {
+        return try {
+            val index = allSets.indexOfFirst { it.id == id }
+            if (index == -1) {
+                return Result.failure(IllegalArgumentException("Набор с ID $id не найден"))
+            }
+
+            // Удаляем набор из базы данных (карточки удалятся автоматически по CASCADE)
+            databaseService.cardSets.deleteCardSet(id)
+
+            // Удаляем из памяти
+            allSets.removeAt(index)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private fun createPaginatedResult(
         sets: List<CardSet>,
         page: Int,

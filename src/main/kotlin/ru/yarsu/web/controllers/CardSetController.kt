@@ -271,6 +271,36 @@ class CardSetController(private val cardSetService: CardSetService) {
             call.respondRedirect("/sets/config?new_title=$encodedTitle&new_is_private=$isPrivate")
         }
 
+        route.post("/sets/delete/{setId}") {
+            val session = call.requireAuth() ?: return@post
+
+            val setId = call.parameters["setId"]
+            if (setId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                return@post
+            }
+
+            val cardSet = cardSetService.getSetById(setId)
+            if (cardSet == null) {
+                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                return@post
+            }
+
+            // Проверяем, что пользователь является владельцем набора
+            if (cardSet.userId != session.userId) {
+                call.respond(HttpStatusCode.Forbidden, "У вас нет прав на удаление этого набора")
+                return@post
+            }
+
+            val result = cardSetService.deleteSet(setId)
+
+            result.onSuccess {
+                call.respondRedirect("/sets")
+            }.onFailure { error ->
+                call.respond(HttpStatusCode.InternalServerError, error.message ?: "Произошла ошибка при удалении набора")
+            }
+        }
+
         route.post("/sets/save") {
             val session = call.requireAuth() ?: return@post
             val parameters = call.receiveParameters()

@@ -14,6 +14,7 @@ interface CardSetService {
     fun createSet(cardSet: CardSet): Result<CardSet>
     fun getSetById(id: String): CardSet?
     fun updateSet(cardSet: CardSet): Result<CardSet>
+    fun deleteSet(id: String): Result<Unit>
 }
 
 data class PaginatedResult<T>(
