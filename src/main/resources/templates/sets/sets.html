@@ -25,7 +25,6 @@
             <div class="mb-3 mb-md-0 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
                 <div class="glass-effect border-glass p-3 rounded-4">
                     <span class="text-light">
-                        <i class="bi bi-card-checklist me-2 text-primary"></i>
                         Всего наборов: <span class="fw-bold">{{ total_sets|default('0') }}</span>
                     </span>
                 </div>
@@ -66,7 +65,7 @@
                            value="{{ search_query|default('') }}">
                     <input type="hidden" name="only_my" value="{% if only_my_sets %}true{% else %}false{% endif %}">
                     <button class="btn btn-outline-light glass-effect border-glass" type="submit">
-                        <i class="bi bi-search"></i> Найти
+                        Найти
                     </button>
                 </form>
             </div>
@@ -102,7 +101,6 @@
             <!-- Состояние при отсутствии наборов -->
             <div class="col-12 text-center py-5">
                 <div class="empty-state p-5 rounded-4 glass-effect border-dashed">
-                    <i class="bi bi-card-checklist display-1 text-secondary mb-4"></i>
                     <h3 class="text-white mb-3">У вас пока нет наборов карточек</h3>
                     <p class="text-light opacity-75 mb-4 lead">
                         Создайте свой первый набор, чтобы начать эффективное обучение

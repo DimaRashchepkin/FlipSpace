@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cards.length === 0 && !placeholder) {
             cardsList.innerHTML = `
                 <div class="text-center py-5">
-                    <i class="bi bi-card-text display-4 text-secondary mb-3"></i>
+                    <i class="bi bi-card-text display-4 text-white mb-3"></i>
                     <p class="text-light opacity-75">Карточки пока не добавлены</p>
                 </div>
             `;
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showAlert(message, type = 'info') {
         // Создаем элемент уведомления
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show glass-effect border-glass`;
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show glass-effect border-glass text-white`;
         alertDiv.style.position = 'fixed';
         alertDiv.style.top = '20px';
         alertDiv.style.right = '20px';

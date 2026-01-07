@@ -10,6 +10,8 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import ru.yarsu.models.Card
 import ru.yarsu.models.CardSet
 import ru.yarsu.services.CardSetService
@@ -43,7 +45,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                         totalItems = myResults.size,
                         currentPage = allResults.currentPage,
                         totalPages = if (myResults.isEmpty()) 1 else allResults.totalPages,
-                        perPage = allResults.perPage
+                        perPage = allResults.perPage,
                     )
                 } else {
                     cardSetService.searchSetsPaginatedVisibleToUser(searchQuery, page, DEFAULT_PER_PAGE, session.userId)
@@ -58,7 +60,7 @@ class CardSetController(private val cardSetService: CardSetService) {
                         totalItems = myResults.size,
                         currentPage = allResults.currentPage,
                         totalPages = if (myResults.isEmpty()) 1 else allResults.totalPages,
-                        perPage = allResults.perPage
+                        perPage = allResults.perPage,
                     )
                 } else {
                     cardSetService.getSetsPaginatedVisibleToUser(page, DEFAULT_PER_PAGE, session.userId)
@@ -250,6 +252,40 @@ class CardSetController(private val cardSetService: CardSetService) {
 
                 call.respond(HttpStatusCode.BadRequest, PebbleContent("sets/config-set.html", model))
             }
+        }
+
+        route.get("/study/{setId}") {
+            val session = call.requireAuth() ?: return@get
+
+            val setId = call.parameters["setId"]
+            if (setId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                return@get
+            }
+
+            val cardSet = cardSetService.getSetById(setId)
+            if (cardSet == null) {
+                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                return@get
+            }
+
+            // Проверяем доступ к набору
+            if (cardSet.isPrivate && cardSet.userId != session.userId) {
+                call.respond(HttpStatusCode.Forbidden, "У вас нет доступа к этому набору")
+                return@get
+            }
+
+            // Преобразуем карточки в JSON для JavaScript
+            val cardsJson = Json.encodeToString(cardSet.content)
+
+            val model = mapOf<String, Any>(
+                "set_title" to cardSet.title,
+                "cards" to cardSet.content,
+                "cards_json" to cardsJson,
+                "username" to session.username,
+            )
+
+            call.respond(PebbleContent("sets/study.html", model))
         }
     }
 }

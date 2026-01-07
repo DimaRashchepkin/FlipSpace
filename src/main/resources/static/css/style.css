@@ -385,3 +385,191 @@ textarea.form-control {
     }
 }
 
+/* Flashcard Study Styles */
+.flashcard-container {
+    min-height: 400px;
+    transition: all 0.3s ease;
+}
+
+/* Study statistics badges */
+.study-stat-badge {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.study-stat-badge .fw-bold {
+    color: var(--white);
+    font-size: 1.1rem;
+}
+
+.study-stat-separator {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 1.2rem;
+}
+
+.flashcard {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-heavy);
+}
+
+.flashcard:hover {
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+}
+
+.card-content {
+    width: 100%;
+}
+
+/* Rating buttons */
+.btn-rating {
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    border: 2px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+    min-width: 100px;
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-rating:hover {
+    transform: translateY(-3px);
+    border-color: var(--white);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-rating:active {
+    transform: scale(0.95);
+}
+
+.rating-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.rating-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* Градиенты для кнопок оценки */
+.btn-rating-1 {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.btn-rating-1:hover {
+    border-color: rgb(239, 68, 68);
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.btn-rating-2 {
+    border-color: rgba(249, 115, 22, 0.5);
+}
+
+.btn-rating-2:hover {
+    border-color: rgb(249, 115, 22);
+    background: rgba(249, 115, 22, 0.2);
+}
+
+.btn-rating-3 {
+    border-color: rgba(234, 179, 8, 0.5);
+}
+
+.btn-rating-3:hover {
+    border-color: rgb(234, 179, 8);
+    background: rgba(234, 179, 8, 0.2);
+}
+
+.btn-rating-4 {
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.btn-rating-4:hover {
+    border-color: rgb(59, 130, 246);
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.btn-rating-5 {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.btn-rating-5:hover {
+    border-color: rgb(34, 197, 94);
+    background: rgba(34, 197, 94, 0.2);
+}
+
+/* Keyboard shortcut badges */
+kbd {
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Completion screen animations */
+#completion-screen {
+    transition: all 0.5s ease;
+}
+
+/* Progress bar custom styling */
+.progress {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.5s ease;
+}
+
+/* Answer reveal animation */
+#answer-container {
+    transition: all 0.3s ease;
+}
+
+/* Responsive adjustments for study page */
+@media (max-width: 768px) {
+    .flashcard {
+        min-height: 350px;
+        padding: 2rem !important;
+    }
+
+    .btn-rating {
+        min-width: 70px;
+        padding: 0.75rem 1rem;
+    }
+
+    .rating-number {
+        font-size: 1.25rem;
+    }
+
+    .rating-label {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .flashcard {
+        min-height: 300px;
+    }
+
+    .btn-rating {
+        flex: 1;
+        min-width: 60px;
+    }
+}
+
