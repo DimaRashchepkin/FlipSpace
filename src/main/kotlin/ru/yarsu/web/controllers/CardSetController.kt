@@ -100,7 +100,12 @@ class CardSetController(private val cardSetService: CardSetService) {
             val newIsPrivate = call.request.queryParameters["new_is_private"]?.toBoolean() ?: false
 
             if (setId.isNullOrBlank() && newTitle.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора или параметры нового набора не указаны")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Неверный запрос",
+                    "errorMessage" to "ID набора или параметры нового набора не указаны.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("errors/400.html", errorModel))
                 return@get
             }
 
@@ -108,7 +113,12 @@ class CardSetController(private val cardSetService: CardSetService) {
                 // Редактирование существующего набора
                 val cardSet = cardSetService.getSetById(setId)
                 if (cardSet == null) {
-                    call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                    val errorModel = mapOf<String, Any>(
+                        "errorTitle" to "Набор не найден",
+                        "errorMessage" to "Запрашиваемый набор карточек не существует или был удалён.",
+                        "username" to session.username,
+                    )
+                    call.respond(HttpStatusCode.NotFound, PebbleContent("errors/404.html", errorModel))
                     return@get
                 }
 
@@ -137,19 +147,34 @@ class CardSetController(private val cardSetService: CardSetService) {
 
             val setId = call.parameters["setId"]
             if (setId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Неверный запрос",
+                    "errorMessage" to "ID набора не указан.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("errors/400.html", errorModel))
                 return@get
             }
 
             val cardSet = cardSetService.getSetById(setId)
             if (cardSet == null) {
-                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Набор не найден",
+                    "errorMessage" to "Запрашиваемый набор карточек не существует или был удалён.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.NotFound, PebbleContent("errors/404.html", errorModel))
                 return@get
             }
 
             // Проверяем, что пользователь является владельцем набора
             if (cardSet.userId != session.userId) {
-                call.respond(HttpStatusCode.Forbidden, "У вас нет прав на редактирование этого набора")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Доступ запрещён",
+                    "errorMessage" to "У вас нет прав на редактирование этого набора.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.Forbidden, PebbleContent("errors/403.html", errorModel))
                 return@get
             }
 
@@ -168,19 +193,34 @@ class CardSetController(private val cardSetService: CardSetService) {
 
             val setId = call.parameters["setId"]
             if (setId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Неверный запрос",
+                    "errorMessage" to "ID набора не указан.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("errors/400.html", errorModel))
                 return@post
             }
 
             val cardSet = cardSetService.getSetById(setId)
             if (cardSet == null) {
-                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Набор не найден",
+                    "errorMessage" to "Запрашиваемый набор карточек не существует или был удалён.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.NotFound, PebbleContent("errors/404.html", errorModel))
                 return@post
             }
 
             // Проверяем, что пользователь является владельцем набора
             if (cardSet.userId != session.userId) {
-                call.respond(HttpStatusCode.Forbidden, "У вас нет прав на редактирование этого набора")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Доступ запрещён",
+                    "errorMessage" to "У вас нет прав на редактирование этого набора.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.Forbidden, PebbleContent("errors/403.html", errorModel))
                 return@post
             }
 
@@ -276,19 +316,34 @@ class CardSetController(private val cardSetService: CardSetService) {
 
             val setId = call.parameters["setId"]
             if (setId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Неверный запрос",
+                    "errorMessage" to "ID набора не указан.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("errors/400.html", errorModel))
                 return@post
             }
 
             val cardSet = cardSetService.getSetById(setId)
             if (cardSet == null) {
-                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Набор не найден",
+                    "errorMessage" to "Запрашиваемый набор карточек не существует или был удалён.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.NotFound, PebbleContent("errors/404.html", errorModel))
                 return@post
             }
 
             // Проверяем, что пользователь является владельцем набора
             if (cardSet.userId != session.userId) {
-                call.respond(HttpStatusCode.Forbidden, "У вас нет прав на удаление этого набора")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Доступ запрещён",
+                    "errorMessage" to "У вас нет прав на удаление этого набора.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.Forbidden, PebbleContent("errors/403.html", errorModel))
                 return@post
             }
 
@@ -297,7 +352,12 @@ class CardSetController(private val cardSetService: CardSetService) {
             result.onSuccess {
                 call.respondRedirect("/sets")
             }.onFailure { error ->
-                call.respond(HttpStatusCode.InternalServerError, error.message ?: "Произошла ошибка при удалении набора")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Ошибка сервера",
+                    "errorMessage" to (error.message ?: "Произошла ошибка при удалении набора."),
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.InternalServerError, PebbleContent("errors/500.html", errorModel))
             }
         }
 
@@ -363,7 +423,12 @@ class CardSetController(private val cardSetService: CardSetService) {
                 // Обновляем существующий набор
                 val existingSet = cardSetService.getSetById(setId)
                 if (existingSet == null) {
-                    call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                    val errorModel = mapOf<String, Any>(
+                        "errorTitle" to "Набор не найден",
+                        "errorMessage" to "Запрашиваемый набор карточек не существует или был удалён.",
+                        "username" to session.username,
+                    )
+                    call.respond(HttpStatusCode.NotFound, PebbleContent("errors/404.html", errorModel))
                     return@post
                 }
 
@@ -396,19 +461,34 @@ class CardSetController(private val cardSetService: CardSetService) {
 
             val setId = call.parameters["setId"]
             if (setId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "ID набора не указан")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Неверный запрос",
+                    "errorMessage" to "ID набора не указан.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.BadRequest, PebbleContent("errors/400.html", errorModel))
                 return@get
             }
 
             val cardSet = cardSetService.getSetById(setId)
             if (cardSet == null) {
-                call.respond(HttpStatusCode.NotFound, "Набор не найден")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Набор не найден",
+                    "errorMessage" to "Запрашиваемый набор карточек не существует или был удалён.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.NotFound, PebbleContent("errors/404.html", errorModel))
                 return@get
             }
 
             // Проверяем доступ к набору
             if (cardSet.isPrivate && cardSet.userId != session.userId) {
-                call.respond(HttpStatusCode.Forbidden, "У вас нет доступа к этому набору")
+                val errorModel = mapOf<String, Any>(
+                    "errorTitle" to "Доступ запрещён",
+                    "errorMessage" to "У вас нет доступа к этому приватному набору карточек.",
+                    "username" to session.username,
+                )
+                call.respond(HttpStatusCode.Forbidden, PebbleContent("errors/403.html", errorModel))
                 return@get
             }
 
