@@ -58,7 +58,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
             io.ktor.http.HttpStatusCode.BadRequest,
             PebbleContent(
                 "authentication/register.html",
-                mapOf("error" to validationError.message, "username" to username),
+                mapOf("error" to validationError.message, "input_username" to username),
             ),
         )
         return
@@ -75,7 +75,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleRegisterPost(aut
                 io.ktor.http.HttpStatusCode.BadRequest,
                 PebbleContent(
                     "authentication/register.html",
-                    mapOf("error" to (error.message ?: ""), "username" to username),
+                    mapOf("error" to (error.message ?: "Произошла ошибка"), "input_username" to username),
                 ),
             )
         },
@@ -97,7 +97,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleLoginPost(authSe
             io.ktor.http.HttpStatusCode.BadRequest,
             PebbleContent(
                 "authentication/login.html",
-                mapOf("error" to validationError.message, "login" to login),
+                mapOf("error" to validationError.message, "input_login" to login),
             ),
         )
         return
@@ -114,7 +114,7 @@ private suspend fun io.ktor.server.routing.RoutingContext.handleLoginPost(authSe
                 io.ktor.http.HttpStatusCode.BadRequest,
                 PebbleContent(
                     "authentication/login.html",
-                    mapOf("error" to (error.message ?: ""), "login" to login),
+                    mapOf("error" to (error.message ?: "Произошла ошибка"), "input_login" to login),
                 ),
             )
         },
