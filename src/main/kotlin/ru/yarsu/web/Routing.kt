@@ -6,6 +6,7 @@ import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlinx.serialization.Serializable
 import ru.yarsu.db.DatabaseFactory
@@ -65,9 +66,16 @@ fun Application.configureRouting() {
             handleHealthCheck()
         }
 
+        // Legacy API routes (kept for backward compatibility)
         userRoutes(dbService)
         cardRoutes(dbService)
-        cardSetRoutes(dbService)
+
+        // API routes with /api prefix to avoid conflicts with HTML routes
+        route("/api") {
+            userRoutes(dbService)
+            cardRoutes(dbService)
+            cardSetRoutes(dbService)
+        }
 
         staticResources("/static", "static")
     }

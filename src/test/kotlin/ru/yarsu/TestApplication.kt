@@ -66,11 +66,13 @@ object TestDatabaseConnection {
                     """.trimIndent(),
                 )
 
+                // Cards table for CardSet API (matches production schema from init.sql)
                 stmt.execute(
                     """
                     CREATE TABLE cards (
                         id VARCHAR(36) PRIMARY KEY,
                         set_id VARCHAR(36) NOT NULL,
+                        title VARCHAR(100),
                         front_text TEXT NOT NULL,
                         back_text TEXT NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
