@@ -201,9 +201,9 @@ class CardSetController(private val cardSetService: CardSetService) {
                 return@post
             }
 
-            if (title.length > 100) {
+            if (title.length > 20) {
                 val model = mapOf<String, Any>(
-                    "error" to "Название набора не может превышать 100 символов",
+                    "error" to "Название набора не может превышать 20 символов",
                     "set_id" to setId,
                     "title" to title,
                     "is_private" to isPrivate,
@@ -255,9 +255,9 @@ class CardSetController(private val cardSetService: CardSetService) {
                 return@post
             }
 
-            if (title.length > 100) {
+            if (title.length > 20) {
                 val model = mapOf<String, Any>(
-                    "error" to "Название набора не может превышать 100 символов",
+                    "error" to "Название набора не может превышать 20 символов",
                     "title" to title,
                     "is_private" to isPrivate,
                     "username" to session.username,

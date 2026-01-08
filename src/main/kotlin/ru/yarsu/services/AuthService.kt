@@ -16,9 +16,12 @@ class AuthService(private val dbService: DatabaseService) {
         return try {
             validateAndRegisterUser(login, password)
         } catch (e: SQLException) {
-            Result.failure(Exception("Ошибка базы данных при регистрации: ${e.message}"))
+            // Не показываем технические детали пользователю
+            println("Database error during registration: ${e.message}")
+            Result.failure(Exception("Произошла ошибка"))
         } catch (e: IllegalArgumentException) {
-            Result.failure(Exception("Недопустимые параметры регистрации: ${e.message}"))
+            println("Invalid registration parameters: ${e.message}")
+            Result.failure(Exception("Произошла ошибка"))
         }
     }
 
@@ -50,9 +53,12 @@ class AuthService(private val dbService: DatabaseService) {
             }
             authResult
         } catch (e: SQLException) {
-            Result.failure(Exception("Ошибка базы данных при аутентификации: ${e.message}"))
+            // Не показываем технические детали пользователю
+            println("Database error during authentication: ${e.message}")
+            Result.failure(Exception("Произошла ошибка"))
         } catch (e: IllegalStateException) {
-            Result.failure(Exception("Ошибка состояния при аутентификации: ${e.message}"))
+            println("State error during authentication: ${e.message}")
+            Result.failure(Exception("Произошла ошибка"))
         }
     }
 
